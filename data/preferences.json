@@ -1,0 +1,15 @@
+{
+  "selected_markets": [
+    "us_sp500",
+    "us_nasdaq100",
+    "us_russell1000",
+    "europe_dax",
+    "europe_ftse100",
+    "europe_cac40",
+    "latam_brazil",
+    "latam_mexico",
+    "latam_colombia",
+    "asia_india",
+    "asia_hongkong"
+  ]
+}

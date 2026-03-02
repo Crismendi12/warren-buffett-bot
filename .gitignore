@@ -1,0 +1,29 @@
+# Secretos — nunca commitear
+.env
+.streamlit/secrets.toml
+
+# Caches grandes (se regeneran automaticamente desde EDGAR/internet)
+data/edgar_facts_cache.json
+data/edgar_ciks.json
+
+# Caches efimeros (se regeneran al usar el browser)
+data/screener_cache*.json
+data/automation_status.json
+data/etf_cache.json
+
+# macOS / Python
+.DS_Store
+__pycache__/
+*.py[cod]
+*.pyo
+.claude/
+
+# -----------------------------------------------------------------
+# INCLUIDOS (no ignorados, necesarios para el deploy):
+#   data/results_cache.json   — resultados de analisis pre-computados
+#   data/watchlist.json       — lista de tickers
+#   data/portfolio.json       — portafolio
+#   data/preferences.json     — configuracion del usuario
+#   .streamlit/config.toml    — tema oscuro
+#   .env.example              — template de API key
+# -----------------------------------------------------------------
