@@ -72,10 +72,10 @@ def run(symbol: str) -> FirewallResult:
         issues.append(FirewallIssue(
             level="block",
             code="INVALID_TICKER",
-            message="Ticker no encontrado",
+            message="Ticker not found",
             detail=(
-                f"'{symbol}' no devolvio datos validos de Yahoo Finance. "
-                "Verifica que el ticker sea correcto (ej: AAPL, KO, MSFT)."
+                f"'{symbol}' did not return valid data from Yahoo Finance. "
+                "Verify that the ticker is correct (e.g. AAPL, KO, MSFT)."
             ),
         ))
         return FirewallResult(status="BLOCK", issues=issues)
@@ -88,11 +88,11 @@ def run(symbol: str) -> FirewallResult:
         issues.append(FirewallIssue(
             level="block",
             code="NOT_AN_EQUITY",
-            message=f"Instrumento no analizable: {quote_type.upper()}",
+            message=f"Non-analyzable instrument: {quote_type.upper()}",
             detail=(
-                "El analisis de Buffett requiere una empresa con estados financieros reales. "
-                f"'{symbol}' es un {quote_type.upper()}, no una accion individual. "
-                "Busca empresas como KO, AAPL, JNJ."
+                "Buffett analysis requires a company with real financial statements. "
+                f"'{symbol}' is a {quote_type.upper()}, not an individual stock. "
+                "Look for companies like KO, AAPL, JNJ."
             ),
         ))
 
@@ -101,10 +101,10 @@ def run(symbol: str) -> FirewallResult:
         issues.append(FirewallIssue(
             level="block",
             code="LEVERAGED_ETF",
-            message="ETF apalancado o inverso detectado",
+            message="Leveraged or inverse ETF detected",
             detail=(
-                "Los ETFs apalancados/inversos no tienen fundamentales empresariales. "
-                "Son instrumentos especulativos incompatibles con el analisis de valor."
+                "Leveraged/inverse ETFs have no business fundamentals. "
+                "They are speculative instruments incompatible with value analysis."
             ),
         ))
 
@@ -115,12 +115,12 @@ def run(symbol: str) -> FirewallResult:
         issues.append(FirewallIssue(
             level="block",
             code="MICRO_CAP",
-            message=f"Capitalizacion muy baja: ${cap_m:.0f}M",
+            message=f"Very low market cap: ${cap_m:.0f}M",
             detail=(
-                f"Con una cap. de mercado de ${cap_m:.0f}M, esta empresa es micro/nano-cap. "
-                "Los datos financieros suelen ser incompletos o poco fiables a esta escala. "
-                "Buffett invierte en empresas con ventajas competitivas duraderas, "
-                "lo que generalmente requiere escala significativa."
+                f"With a market cap of ${cap_m:.0f}M, this company is micro/nano-cap. "
+                "Financial data is often incomplete or unreliable at this scale. "
+                "Buffett invests in companies with durable competitive advantages, "
+                "which generally requires significant scale."
             ),
         ))
 
@@ -131,11 +131,11 @@ def run(symbol: str) -> FirewallResult:
         issues.append(FirewallIssue(
             level="block",
             code="INSUFFICIENT_HISTORY",
-            message=f"Historial financiero insuficiente: {years_of_data} año(s)",
+            message=f"Insufficient financial history: {years_of_data} year(s)",
             detail=(
-                "Se requieren al menos 3 anos de estados financieros anuales "
-                "para evaluar consistencia y tendencias. "
-                f"Solo se encontraron {years_of_data} periodo(s) para '{symbol}'."
+                "At least 3 years of annual financial statements are required "
+                "to assess consistency and trends. "
+                f"Only {years_of_data} period(s) were found for '{symbol}'."
             ),
         ))
 
@@ -145,11 +145,11 @@ def run(symbol: str) -> FirewallResult:
         issues.append(FirewallIssue(
             level="block",
             code="NEGATIVE_EQUITY",
-            message="Patrimonio neto negativo",
+            message="Negative equity",
             detail=(
-                f"El valor en libros por accion es ${book_value:.2f} (negativo). "
-                "Esto invalida el calculo de P/B y ROE. Puede indicar deuda excesiva "
-                "o perdidas acumuladas. Buffett evita empresas con patrimonio negativo."
+                f"Book value per share is ${book_value:.2f} (negative). "
+                "This invalidates P/B and ROE calculations. May indicate excessive debt "
+                "or accumulated losses. Buffett avoids companies with negative equity."
             ),
         ))
 
@@ -159,11 +159,11 @@ def run(symbol: str) -> FirewallResult:
         issues.append(FirewallIssue(
             level="block",
             code="NO_REVENUE",
-            message="Sin ingresos reportados",
+            message="No reported revenue",
             detail=(
-                "No se encontraron ingresos en los estados financieros. "
-                "Puede ser una empresa preoperacional, shell company, o un "
-                "problema de datos en Yahoo Finance."
+                "No revenue found in financial statements. "
+                "Could be a pre-operational company, shell company, or a "
+                "data issue with Yahoo Finance."
             ),
         ))
 
@@ -173,12 +173,12 @@ def run(symbol: str) -> FirewallResult:
         issues.append(FirewallIssue(
             level="warn",
             code="HIGH_VOLATILITY",
-            message=f"Volatilidad extrema: Beta = {beta:.2f}",
+            message=f"Extreme volatility: Beta = {beta:.2f}",
             detail=(
-                f"Beta de {beta:.2f} indica una volatilidad muy superior al mercado. "
-                "Buffett busca negocios predecibles ('dentro de su circulo de competencia'). "
-                "Una beta tan alta sugiere especulacion o riesgo sectorial elevado. "
-                "El analisis se muestra, pero con esta advertencia."
+                f"Beta of {beta:.2f} indicates volatility far above the market. "
+                "Buffett seeks predictable businesses ('within his circle of competence'). "
+                "Such high beta suggests speculation or elevated sector risk. "
+                "The analysis is shown, but with this warning."
             ),
         ))
 
@@ -197,12 +197,12 @@ def run(symbol: str) -> FirewallResult:
         issues.append(FirewallIssue(
             level="warn",
             code="ETHICS_FLAG",
-            message=f"Sector con consideraciones eticas: {info.get('industry', 'N/A')}",
+            message=f"Sector with ethical considerations: {info.get('industry', 'N/A')}",
             detail=(
-                f"Esta empresa opera en '{info.get('industry', sector)}', "
-                "un sector que algunos inversores excluyen por razones eticas o de valores. "
-                "El analisis financiero se aplica normalmente, pero considera si este "
-                "tipo de negocio es compatible con tus principios de inversion."
+                f"This company operates in '{info.get('industry', sector)}', "
+                "a sector that some investors exclude for ethical or value reasons. "
+                "Financial analysis is applied normally, but consider whether this "
+                "type of business aligns with your investment principles."
             ),
         ))
 
@@ -212,11 +212,11 @@ def run(symbol: str) -> FirewallResult:
         issues.append(FirewallIssue(
             level="warn",
             code="NO_PRICE",
-            message="Precio actual no disponible",
+            message="Current price not available",
             detail=(
-                "No se pudo obtener el precio actual de mercado. "
-                "Los calculos de valoracion (P/E, P/B) pueden ser inexactos. "
-                "Verifica que el mercado este abierto o que el ticker este activo."
+                "Could not obtain the current market price. "
+                "Valuation calculations (P/E, P/B) may be inaccurate. "
+                "Verify that the market is open or that the ticker is active."
             ),
         ))
 

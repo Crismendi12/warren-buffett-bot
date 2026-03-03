@@ -34,7 +34,7 @@ import pipeline as pipeline_mod
 # ---------------------------------------------------------------------------
 
 st.set_page_config(
-    page_title="La Boveda | Analisis Buffett",
+    page_title="La Boveda | Buffett Analysis",
     page_icon="",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -303,10 +303,10 @@ def fmt_cap(v) -> str:
 
 
 def score_badge(score: int) -> str:
-    if score >= 80: return "Candidato solido"
-    elif score >= 60: return "En radar"
-    elif score >= 40: return "Con precaucion"
-    else: return "No cumple"
+    if score >= 80: return "Strong candidate"
+    elif score >= 60: return "On radar"
+    elif score >= 40: return "With caution"
+    else: return "Does not qualify"
 
 
 def _score_style(df, col: str = "Score"):
@@ -330,7 +330,7 @@ def _score_style(df, col: str = "Score"):
 
 def _nav_btn(label: str, target: str) -> None:
     """Render a sidebar nav item. Active mode shows as styled div, others as buttons."""
-    cur = st.session_state.get("mode", "Analizar empresa")
+    cur = st.session_state.get("mode", "Analyze Company")
     if cur == target:
         st.markdown(
             f"<div class='nav-btn-active'>{label}</div>",
@@ -343,7 +343,7 @@ def _nav_btn(label: str, target: str) -> None:
 
 
 if "mode" not in st.session_state:
-    st.session_state["mode"] = "Analizar empresa"
+    st.session_state["mode"] = "Analyze Company"
 
 with st.sidebar:
     # --- Brand header ---
@@ -355,35 +355,35 @@ with st.sidebar:
         unsafe_allow_html=True,
     )
 
-    # --- Ticker input (Analizar mode only) ---
-    if st.session_state["mode"] == "Analizar empresa":
+    # --- Ticker input (Analyze mode only) ---
+    if st.session_state["mode"] == "Analyze Company":
         ticker_input = st.text_input(
             "Ticker",
             value="",
-            placeholder="ej: AAPL, KO, MSFT",
+            placeholder="e.g.: AAPL, KO, MSFT",
         ).strip().upper()
-        analyze_btn = st.button("Analizar", type="primary", use_container_width=True)
+        analyze_btn = st.button("Analyze", type="primary", use_container_width=True)
         st.markdown("<div style='margin-bottom:0.4rem'></div>", unsafe_allow_html=True)
     else:
         ticker_input = ""
         analyze_btn = False
 
     # --- Navigation groups ---
-    st.markdown("<div class='nav-section'>ANALIZAR</div>", unsafe_allow_html=True)
-    _nav_btn("Empresa", "Analizar empresa")
-    _nav_btn("Recomendaciones", "Recomendaciones")
+    st.markdown("<div class='nav-section'>ANALYZE</div>", unsafe_allow_html=True)
+    _nav_btn("Company", "Analyze Company")
+    _nav_btn("Recommendations", "Recommendations")
 
-    st.markdown("<div class='nav-section'>DESCUBRIR</div>", unsafe_allow_html=True)
-    _nav_btn("Screener Global", "Screener Global")
+    st.markdown("<div class='nav-section'>DISCOVER</div>", unsafe_allow_html=True)
+    _nav_btn("Global Screener", "Global Screener")
     _nav_btn("Ranking", "Ranking")
-    _nav_btn("ETFs Dividendos", "ETFs con Dividendos")
+    _nav_btn("Dividend ETFs", "Dividend ETFs")
 
-    st.markdown("<div class='nav-section'>GESTIONAR</div>", unsafe_allow_html=True)
-    _nav_btn("Mi Portafolio", "Mi Portafolio")
-    _nav_btn("Mi Watchlist", "Mi Watchlist")
+    st.markdown("<div class='nav-section'>MANAGE</div>", unsafe_allow_html=True)
+    _nav_btn("My Portfolio", "My Portfolio")
+    _nav_btn("My Watchlist", "My Watchlist")
 
-    st.markdown("<div class='nav-section'>CONTEXTO</div>", unsafe_allow_html=True)
-    _nav_btn("Macro", "Contexto Macro")
+    st.markdown("<div class='nav-section'>CONTEXT</div>", unsafe_allow_html=True)
+    _nav_btn("Macro", "Macro Context")
 
     st.markdown("<div style='margin-top:0.6rem'></div>", unsafe_allow_html=True)
 
@@ -415,17 +415,17 @@ with st.sidebar:
             )
 
     st.markdown("<div style='margin-top:0.8rem'></div>", unsafe_allow_html=True)
-    with st.expander("Sobre este analisis"):
+    with st.expander("About this analysis"):
         st.caption(
-            "Datos via Yahoo Finance (yfinance). "
-            "Analisis educativo — no es asesoramiento financiero."
+            "Data via Yahoo Finance (yfinance). "
+            "Educational analysis — not financial advice."
         )
 
     # --- Automation panel ---
     st.markdown(
         "<div style='font-size:0.68rem; font-weight:700; color:#c9a84c; "
         "letter-spacing:0.12em; text-transform:uppercase; padding:0.9rem 0 0.3rem; "
-        "border-top:1px solid #1e2d45; margin-top:0.6rem'>AUTOMATIZACION</div>",
+        "border-top:1px solid #1e2d45; margin-top:0.6rem'>AUTOMATION</div>",
         unsafe_allow_html=True,
     )
     _auto_status = pipeline_mod.load_status()
@@ -435,16 +435,16 @@ with st.sidebar:
         _cands = _auto_status.get("candidates_found", "—")
         _added = _auto_status.get("added_to_watchlist", "—")
         _wl_sz = _auto_status.get("watchlist_size", "—")
-        st.sidebar.caption(f"Ultimo ciclo: {_last}")
-        st.sidebar.caption(f"Candidatos: {_cands} | Nuevos en WL: {_added}")
-        st.sidebar.caption(f"WL actual: {_wl_sz} empresas")
-        st.sidebar.caption(f"Proximo: {_next}")
+        st.sidebar.caption(f"Last cycle: {_last}")
+        st.sidebar.caption(f"Candidates: {_cands} | New in WL: {_added}")
+        st.sidebar.caption(f"Current WL: {_wl_sz} companies")
+        st.sidebar.caption(f"Next: {_next}")
     else:
-        st.sidebar.caption("Sin ejecucion registrada.")
-        st.sidebar.caption("Inicia con: python3 scheduler.py --run-now")
+        st.sidebar.caption("No run recorded.")
+        st.sidebar.caption("Start with: python3 scheduler.py --run-now")
 
-    if st.sidebar.button("Ejecutar ahora", key="run_pipeline_now", use_container_width=True):
-        _prog = st.sidebar.progress(0, text="Iniciando pipeline...")
+    if st.sidebar.button("Run now", key="run_pipeline_now", use_container_width=True):
+        _prog = st.sidebar.progress(0, text="Starting pipeline...")
 
         def _pipeline_cb(msg: str, pct: float) -> None:
             _prog.progress(min(pct, 1.0), text=msg[:80])
@@ -452,10 +452,10 @@ with st.sidebar:
         try:
             pipeline_mod.run_full_pipeline(progress_callback=_pipeline_cb)
             _prog.empty()
-            st.sidebar.success("Pipeline completado. Ranking actualizado.")
+            st.sidebar.success("Pipeline complete. Ranking updated.")
         except Exception as _pe:
             _prog.empty()
-            st.sidebar.error(f"Error en pipeline: {_pe}")
+            st.sidebar.error(f"Pipeline error: {_pe}")
         st.rerun()
 
 mode = st.session_state["mode"]
@@ -528,13 +528,13 @@ def _conviction_score(r: dict):
     total = quality_pts + mos_pts + timing_pts + insider_pts + roic_pts
 
     if total >= 75:
-        label, color = "Alta conviccion", "#10b981"
+        label, color = "High conviction", "#10b981"
     elif total >= 55:
-        label, color = "Conviccion media", "#3b82f6"
+        label, color = "Medium conviction", "#3b82f6"
     elif total >= 35:
-        label, color = "Baja conviccion", "#f59e0b"
+        label, color = "Low conviction", "#f59e0b"
     else:
-        label, color = "No recomendado", "#ef4444"
+        label, color = "Not recommended", "#ef4444"
 
     return total, label, color
 
@@ -560,18 +560,18 @@ def _compute_signal_from_cache(total_score: int, iv, price):
         margin = None
         buy_tgt = sell_tgt = None
     if total_score >= 75 and margin is not None and margin >= 0.35:
-        return ("COMPRAR AGRESIVO", "#10b981", buy_tgt, sell_tgt)
+        return ("STRONG BUY", "#10b981", buy_tgt, sell_tgt)
     elif total_score >= 65 and margin is not None and margin >= 0.20:
-        return ("COMPRAR", "#10b981", buy_tgt, sell_tgt)
+        return ("BUY", "#10b981", buy_tgt, sell_tgt)
     elif total_score >= 60 and margin is not None and margin >= 0.10:
-        return ("ACUMULAR", "#3b82f6", buy_tgt, sell_tgt)
+        return ("ACCUMULATE", "#3b82f6", buy_tgt, sell_tgt)
     elif total_score < 40 or (margin is not None and margin <= -0.40):
-        return ("VENDER", "#ef4444", buy_tgt, sell_tgt)
+        return ("SELL", "#ef4444", buy_tgt, sell_tgt)
     elif total_score < 55 or (margin is not None and margin < -0.15):
-        return ("REDUCIR", "#f59e0b", buy_tgt, sell_tgt)
+        return ("REDUCE", "#f59e0b", buy_tgt, sell_tgt)
     elif total_score >= 55:
-        return ("MANTENER", "#f59e0b", buy_tgt, sell_tgt)
-    return ("EVALUAR", "#64748b", buy_tgt, sell_tgt)
+        return ("HOLD", "#f59e0b", buy_tgt, sell_tgt)
+    return ("EVALUATE", "#64748b", buy_tgt, sell_tgt)
 
 
 def _show_drill_down(symbol: str) -> None:
@@ -579,7 +579,7 @@ def _show_drill_down(symbol: str) -> None:
     import warnings as _w
 
     # Back button
-    if st.button("← Volver a Recomendaciones", key="drill_back"):
+    if st.button("← Back to Recommendations", key="drill_back"):
         del st.session_state["rec_drill"]
         st.rerun()
 
@@ -587,7 +587,7 @@ def _show_drill_down(symbol: str) -> None:
     _cache = batch.load_cache()
     _r = _cache.get("results", {}).get(symbol)
     if not _r:
-        st.error(f"No hay datos para {symbol} en el cache. Ejecuta el analisis primero.")
+        st.error(f"No data for {symbol} in cache. Run the analysis first.")
         return
 
     sc       = _r.get("total_score", 0)
@@ -606,8 +606,8 @@ def _show_drill_down(symbol: str) -> None:
         f"<span style='font-size:1.1rem; color:#94a3b8; margin-left:0.9rem'>{company}</span>"
         f"</div>"
         f"<div style='color:#64748b; font-size:0.85rem; margin-bottom:0.8rem'>"
-        f"{sector} · {industry} | Precio: {'$'+f'{price:.2f}' if price else 'N/A'} | "
-        f"Cap: {fmt_cap(mktcap)} | Analizado: {analyzed}"
+        f"{sector} · {industry} | Price: {'$'+f'{price:.2f}' if price else 'N/A'} | "
+        f"Cap: {fmt_cap(mktcap)} | Analyzed: {analyzed}"
         f"</div>",
         unsafe_allow_html=True,
     )
@@ -631,7 +631,7 @@ def _show_drill_down(symbol: str) -> None:
                     {"range": [mx*0.8, mx], "color": "#0d1f18"},
                 ],
             },
-            title={"text": "Puntuacion Buffett", "font": {"size": 16, "color": "#64748b"}},
+            title={"text": "Buffett Score", "font": {"size": 16, "color": "#64748b"}},
         ))
         _fig.update_layout(
             height=260, margin=dict(t=40, b=0, l=20, r=20),
@@ -644,7 +644,7 @@ def _show_drill_down(symbol: str) -> None:
     try:
         _sig_lbl, _sig_col, _buy_t, _sell_t = _compute_signal_from_cache(sc, iv, price)
     except Exception:
-        _sig_lbl, _sig_col, _buy_t, _sell_t = ("EVALUAR", "#64748b", None, None)
+        _sig_lbl, _sig_col, _buy_t, _sell_t = ("EVALUATE", "#64748b", None, None)
     _iv_disp  = f"${iv:.2f}" if iv else "N/C"
     _buy_str  = f"${_buy_t:.2f}"  if _buy_t  else "—"
     _sell_str = f"${_sell_t:.2f}" if _sell_t else "—"
@@ -657,20 +657,20 @@ def _show_drill_down(symbol: str) -> None:
             f"<div style='padding:1.4rem; background:#141c2e; border:1px solid #1e2d45; "
             f"border-left:4px solid {_vc}; border-radius:12px; margin-top:0.5rem'>"
             f"<div style='font-size:0.72rem; text-transform:uppercase; letter-spacing:0.1em; "
-            f"color:#64748b; margin-bottom:0.3rem'>Veredicto</div>"
+            f"color:#64748b; margin-bottom:0.3rem'>Verdict</div>"
             f"<div style='font-size:1.7rem; font-weight:800; color:{_vc}; line-height:1.1; "
             f"margin-bottom:0.5rem'>{verdict}</div>"
             f"<div style='color:#94a3b8; font-size:0.87rem'>"
-            f"Puntuacion: <b style='color:#e2e8f0'>{sc}/100</b> ({sc}%)</div>"
+            f"Score: <b style='color:#e2e8f0'>{sc}/100</b> ({sc}%)</div>"
             f"<div style='margin-top:0.9rem; padding-top:0.8rem; border-top:1px solid #1e2d45'>"
             f"<div style='font-size:0.72rem; text-transform:uppercase; letter-spacing:0.1em; "
-            f"color:#64748b; margin-bottom:0.3rem'>Señal de accion</div>"
+            f"color:#64748b; margin-bottom:0.3rem'>Action signal</div>"
             f"<div style='font-size:1.2rem; font-weight:800; color:{_sig_col}; "
             f"margin-bottom:0.4rem'>{_sig_lbl}</div>"
             f"<div style='font-size:0.82rem; color:#94a3b8; line-height:1.8'>"
-            f"IV estimado: <b style='color:#e2e8f0'>{_iv_disp}</b><br>"
-            f"Compra &lt; <b style='color:#10b981'>{_buy_str}</b> &nbsp;·&nbsp; "
-            f"Venta &gt; <b style='color:#ef4444'>{_sell_str}</b>"
+            f"Estimated IV: <b style='color:#e2e8f0'>{_iv_disp}</b><br>"
+            f"Buy &lt; <b style='color:#10b981'>{_buy_str}</b> &nbsp;·&nbsp; "
+            f"Sell &gt; <b style='color:#ef4444'>{_sell_str}</b>"
             f"</div></div></div>",
             unsafe_allow_html=True,
         )
@@ -679,9 +679,9 @@ def _show_drill_down(symbol: str) -> None:
     st.markdown("<div style='margin-top:1rem'></div>", unsafe_allow_html=True)
     _secs = [
         ("moat",      "Moat"),
-        ("valuation", "Valoracion"),
-        ("health",    "Salud"),
-        ("growth",    "Crecimiento"),
+        ("valuation", "Valuation"),
+        ("health",    "Health"),
+        ("growth",    "Growth"),
     ]
     _sc1, _sc2, _sc3, _sc4 = st.columns(4)
     for _col, (key, name) in zip([_sc1, _sc2, _sc3, _sc4], _secs):
@@ -704,15 +704,15 @@ def _show_drill_down(symbol: str) -> None:
 
     # --- Detail tabs ---
     _dt1, _dt2, _dt3, _dt4 = st.tabs([
-        "Criterios detallados", "Graficas historicas", "ROIC", "Insiders"
+        "Detailed criteria", "Historical charts", "ROIC", "Insiders"
     ])
 
     # Tab 1: criteria from cache (instant)
     with _dt1:
-        for _sk, _sn in [("moat", "Moat / Ventaja Competitiva"),
-                         ("valuation", "Valoracion / Valor Intrinseco"),
-                         ("health",    "Salud Financiera"),
-                         ("growth",    "Crecimiento Consistente")]:
+        for _sk, _sn in [("moat", "Moat / Competitive Advantage"),
+                         ("valuation", "Valuation / Intrinsic Value"),
+                         ("health",    "Financial Health"),
+                         ("growth",    "Consistent Growth")]:
             _sd2  = _r.get(_sk, {})
             _ss2  = _sd2.get("score", 0)
             _sm2  = _sd2.get("max_score", 25)
@@ -733,13 +733,13 @@ def _show_drill_down(symbol: str) -> None:
                 _pm   = _cr.get("points_max", 0)
                 _raw  = _cr.get("raw_label", "N/A")
                 with st.expander(f"{_icon} {_cr.get('name','?')}  —  {_pe}/{_pm} pts  |  {_raw}"):
-                    st.markdown(f"**Criterio:** {_cr.get('threshold','—')}")
-                    st.markdown(f"**Fuente:** {_cr.get('source','—')}")
-                    st.markdown(f"**Justificacion:** {_cr.get('explanation','—')}")
+                    st.markdown(f"**Criterion:** {_cr.get('threshold','—')}")
+                    st.markdown(f"**Source:** {_cr.get('source','—')}")
+                    st.markdown(f"**Justification:** {_cr.get('explanation','—')}")
 
     # Tab 2: historical charts (fetched live)
     with _dt2:
-        with st.spinner("Cargando graficas historicas..."):
+        with st.spinner("Loading historical charts..."):
             with _w.catch_warnings():
                 _w.simplefilter("ignore")
                 _roe_d  = metrics.get_roe_history(symbol)
@@ -758,13 +758,13 @@ def _show_drill_down(symbol: str) -> None:
                 _fig_roe.update_layout(showlegend=False, margin=dict(t=40, b=30))
                 st.plotly_chart(_fig_roe, use_container_width=True)
             else:
-                st.info("Sin datos de ROE")
+                st.info("No ROE data")
         with _hc2:
             if _rev_d["values"]:
                 _fig_re = go.Figure()
                 _fig_re.add_trace(go.Scatter(
                     x=_rev_d["years"], y=[v/1e9 for v in _rev_d["values"]],
-                    mode="lines+markers", name="Ingresos ($B)", yaxis="y1",
+                    mode="lines+markers", name="Revenue ($B)", yaxis="y1",
                     line=dict(color="#3498db", width=2),
                 ))
                 if _eps_d["values"]:
@@ -775,31 +775,31 @@ def _show_drill_down(symbol: str) -> None:
                     ))
                 _dark_layout(_fig_re, height=300)
                 _fig_re.update_layout(
-                    title=dict(text="Ingresos y EPS", font=dict(color="#e2e8f0")),
-                    yaxis=dict(title="Ingresos ($B)", gridcolor="#1e2d45"),
+                    title=dict(text="Revenue and EPS", font=dict(color="#e2e8f0")),
+                    yaxis=dict(title="Revenue ($B)", gridcolor="#1e2d45"),
                     yaxis2=dict(title="EPS ($)", overlaying="y", side="right", gridcolor="#1e2d45"),
                     legend=dict(orientation="h", y=1.1, font=dict(color="#e2e8f0")),
                     margin=dict(t=50, b=30),
                 )
                 st.plotly_chart(_fig_re, use_container_width=True)
             else:
-                st.info("Sin datos de ingresos")
+                st.info("No revenue data")
         with _hc3:
             if not _ph.empty:
-                _fig_ph = px.line(_ph.reset_index(), x="Date", y="Close", title="Precio 5 anos")
+                _fig_ph = px.line(_ph.reset_index(), x="Date", y="Close", title="5-Year Price")
                 _fig_ph.update_traces(line_color="#c9a84c")
                 _dark_layout(_fig_ph, height=300)
                 _fig_ph.update_layout(margin=dict(t=40, b=30))
                 st.plotly_chart(_fig_ph, use_container_width=True)
             else:
-                st.info("Sin datos de precio")
+                st.info("No price data")
 
     # Tab 3: ROIC (fetched live)
     with _dt3:
-        with st.spinner("Calculando ROIC y calidad del capital..."):
+        with st.spinner("Calculating ROIC and capital quality..."):
             _cap_d = capital_mod.get_capital_quality(symbol)
         if _cap_d.get("error"):
-            st.info(f"ROIC no disponible: {_cap_d['error']}")
+            st.info(f"ROIC not available: {_cap_d['error']}")
         else:
             _rvc = _cap_d["verdict_color"]
             _rvt = _cap_d["verdict"]
@@ -815,7 +815,7 @@ def _show_drill_down(symbol: str) -> None:
                 f"border-left:5px solid {_rvc}; border-radius:10px; margin-bottom:1rem'>"
                 f"<span style='font-size:1.05rem; font-weight:700; color:{_rvc}'>{_rvt}</span>"
                 f"<span style='color:#64748b; font-size:0.85rem; margin-left:0.8rem'>"
-                f"ROIC prom: {_ra:.1f}% · Tendencia: {_rt}"
+                f"Avg ROIC: {_ra:.1f}% · Trend: {_rt}"
                 f"{(' · WACC: ' + str(_rw) + '%') if _rw else ''}"
                 f"{(' · Spread: ' + ('+' if _rs >= 0 else '') + str(_rs) + '%') if _rs is not None else ''}"
                 f"</span></div>",
@@ -823,7 +823,7 @@ def _show_drill_down(symbol: str) -> None:
             )
             _rmc1, _rmc2, _rmc3 = st.columns(3)
             with _rmc1:
-                _bbm = {"yes": ("Recomprando acciones", "#10b981"), "no": ("Diluyendo acciones", "#ef4444"), "neutral": ("Sin tendencia clara", "#64748b")}
+                _bbm = {"yes": ("Buying back shares", "#10b981"), "no": ("Diluting shares", "#ef4444"), "neutral": ("No clear trend", "#64748b")}
                 _bbl, _bbc = _bbm.get(_rbb, ("—", "#64748b"))
                 st.markdown(f"<div style='text-align:center; padding:0.8rem; background:#141c2e; border:1px solid #1e2d45; border-radius:10px'><div style='font-size:0.7rem; color:#64748b; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.3rem'>Buybacks</div><div style='font-size:1rem; font-weight:700; color:{_bbc}'>{_bbl}</div></div>", unsafe_allow_html=True)
             with _rmc2:
@@ -838,15 +838,15 @@ def _show_drill_down(symbol: str) -> None:
                 if _rw:
                     _fig_roic2.add_hline(y=_rw, line_dash="dash", line_color="#64748b", annotation_text=f"WACC est. {_rw}%", annotation_font_color="#64748b")
                 _dark_layout(_fig_roic2, height=260)
-                _fig_roic2.update_layout(title=dict(text="ROIC historico (%)", font=dict(color="#e2e8f0")), yaxis=dict(title="ROIC %", gridcolor="#1e2d45"), xaxis=dict(title="Ano"), margin=dict(t=50, b=30), showlegend=False)
+                _fig_roic2.update_layout(title=dict(text="ROIC history (%)", font=dict(color="#e2e8f0")), yaxis=dict(title="ROIC %", gridcolor="#1e2d45"), xaxis=dict(title="Year"), margin=dict(t=50, b=30), showlegend=False)
                 st.plotly_chart(_fig_roic2, use_container_width=True)
 
     # Tab 4: Insiders (fetched live)
     with _dt4:
-        with st.spinner("Obteniendo transacciones de insiders..."):
+        with st.spinner("Fetching insider transactions..."):
             _ins2 = insider_mod.get_insider_signal(symbol)
         if _ins2.get("error"):
-            st.info(f"Datos de insiders no disponibles: {_ins2['error']}")
+            st.info(f"Insider data not available: {_ins2['error']}")
         else:
             _ic  = _ins2["signal_color"]
             _il  = _ins2["signal_label"]
@@ -863,12 +863,12 @@ def _show_drill_down(symbol: str) -> None:
 
             _ic1, _ic2, _ic3 = st.columns(3)
             with _ic1:
-                st.markdown(f"<div style='text-align:center; padding:0.8rem; background:#141c2e; border:1px solid #1e2d45; border-radius:10px'><div style='font-size:0.7rem; color:#64748b; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.3rem'>Señal (6 meses)</div><div style='font-size:1.1rem; font-weight:800; color:{_ic}'>{_il}</div></div>", unsafe_allow_html=True)
+                st.markdown(f"<div style='text-align:center; padding:0.8rem; background:#141c2e; border:1px solid #1e2d45; border-radius:10px'><div style='font-size:0.7rem; color:#64748b; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.3rem'>Signal (6 months)</div><div style='font-size:1.1rem; font-weight:800; color:{_ic}'>{_il}</div></div>", unsafe_allow_html=True)
             with _ic2:
                 _inc = "#10b981" if (_in or 0) >= 0 else "#ef4444"
-                st.markdown(f"<div style='text-align:center; padding:0.8rem; background:#141c2e; border:1px solid #1e2d45; border-radius:10px'><div style='font-size:0.7rem; color:#64748b; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.3rem'>Neto (compras - ventas)</div><div style='font-size:1.05rem; font-weight:700; color:{_inc}'>{_fmt_m2(_in)}</div></div>", unsafe_allow_html=True)
+                st.markdown(f"<div style='text-align:center; padding:0.8rem; background:#141c2e; border:1px solid #1e2d45; border-radius:10px'><div style='font-size:0.7rem; color:#64748b; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.3rem'>Net (buys - sells)</div><div style='font-size:1.05rem; font-weight:700; color:{_inc}'>{_fmt_m2(_in)}</div></div>", unsafe_allow_html=True)
             with _ic3:
-                st.markdown(f"<div style='text-align:center; padding:0.8rem; background:#141c2e; border:1px solid #1e2d45; border-radius:10px'><div style='font-size:0.7rem; color:#64748b; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.3rem'>Operaciones</div><div style='font-size:0.9rem; font-weight:700; color:#e2e8f0'><span style='color:#10b981'>{_ibu} compras</span> · <span style='color:#ef4444'>{_ise} ventas</span></div></div>", unsafe_allow_html=True)
+                st.markdown(f"<div style='text-align:center; padding:0.8rem; background:#141c2e; border:1px solid #1e2d45; border-radius:10px'><div style='font-size:0.7rem; color:#64748b; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.3rem'>Transactions</div><div style='font-size:0.9rem; font-weight:700; color:#e2e8f0'><span style='color:#10b981'>{_ibu} buys</span> · <span style='color:#ef4444'>{_ise} sells</span></div></div>", unsafe_allow_html=True)
 
             if _itx:
                 st.markdown("<div style='margin-top:0.8rem'></div>", unsafe_allow_html=True)
@@ -891,7 +891,7 @@ def _show_drill_down(symbol: str) -> None:
 # MODE 1: Single ticker analysis
 # ===========================================================================
 
-if mode == "Analizar empresa":
+if mode == "Analyze Company":
     if not ticker_input or not analyze_btn:
         # --- Vault landing screen ---
         st.markdown(
@@ -900,7 +900,7 @@ if mode == "Analizar empresa":
             "color:#c9a84c; line-height:1; margin-bottom:0.5rem'>LA BOVEDA</div>"
             "<div style='font-size:1rem; color:#64748b; letter-spacing:0.08em; "
             "text-transform:uppercase; margin-bottom:2rem'>"
-            "Analisis de inversiones al estilo Warren Buffett</div>"
+            "Investment analysis in the style of Warren Buffett</div>"
             "</div>",
             unsafe_allow_html=True,
         )
@@ -909,33 +909,33 @@ if mode == "Analizar empresa":
         _all_results = batch.get_ranked_results(min_score=0)
         _wl_count = len(wl.load())
         _last_run = batch.get_last_run_time()
-        _last_str = "Nunca"
+        _last_str = "Never"
         if _last_run:
             try:
-                _last_str = datetime.fromisoformat(_last_run).strftime("%d/%m/%Y")
+                _last_str = datetime.fromisoformat(_last_run).strftime("%Y-%m-%d")
             except Exception:
                 _last_str = _last_run
 
         s1, s2, s3 = st.columns(3)
-        s1.metric("Empresas analizadas", len(_all_results))
-        s2.metric("Ultimo analisis", _last_str)
-        s3.metric("En mi watchlist", _wl_count)
+        s1.metric("Companies analyzed", len(_all_results))
+        s2.metric("Last analysis", _last_str)
+        s3.metric("In my watchlist", _wl_count)
 
         st.markdown("<div style='margin:1.5rem 0'></div>", unsafe_allow_html=True)
 
         st.markdown(
             "<div class='vault-card-gold'>"
             "<div style='font-size:0.75rem; text-transform:uppercase; letter-spacing:0.1em; "
-            "color:#c9a84c; font-weight:700; margin-bottom:0.6rem'>Como usar La Boveda</div>"
+            "color:#c9a84c; font-weight:700; margin-bottom:0.6rem'>How to use La Boveda</div>"
             "<div style='color:#94a3b8; font-size:0.9rem; line-height:1.7'>"
-            "Introduce un ticker en el panel izquierdo y pulsa <b style='color:#e2e8f0'>Analizar</b>. "
-            "El sistema evalua la empresa en <b style='color:#e2e8f0'>4 pilares</b> "
-            "(Moat, Valoracion, Salud, Crecimiento) sobre 100 puntos, basado en los principios "
-            "que Warren Buffett ha detallado en sus cartas anuales.<br><br>"
-            "Usa el <b style='color:#e2e8f0'>Screener Global</b> para descubrir candidatos en "
-            "multiples mercados, <b style='color:#e2e8f0'>Recomendaciones</b> para ver los mejores "
-            "resultados del batch, y <b style='color:#e2e8f0'>Mi Portafolio</b> para evaluar "
-            "tu conjunto de posiciones."
+            "Enter a ticker in the left panel and press <b style='color:#e2e8f0'>Analyze</b>. "
+            "The system evaluates the company on <b style='color:#e2e8f0'>4 pillars</b> "
+            "(Moat, Valuation, Health, Growth) out of 100 points, based on the principles "
+            "Warren Buffett has detailed in his annual letters.<br><br>"
+            "Use the <b style='color:#e2e8f0'>Global Screener</b> to discover candidates across "
+            "multiple markets, <b style='color:#e2e8f0'>Recommendations</b> to see the best "
+            "batch results, and <b style='color:#e2e8f0'>My Portfolio</b> to evaluate "
+            "your set of positions."
             "</div>"
             "</div>",
             unsafe_allow_html=True,
@@ -943,7 +943,7 @@ if mode == "Analizar empresa":
 
         st.markdown(
             "<div style='text-align:center; color:#64748b; font-size:0.82rem; "
-            "margin-bottom:0.8rem'>Analiza rapidamente:</div>",
+            "margin-bottom:0.8rem'>Quick analyze:</div>",
             unsafe_allow_html=True,
         )
         q1, q2, q3, q4 = st.columns(4)
@@ -955,27 +955,27 @@ if mode == "Analizar empresa":
 
         # Handle quick ticker selection
         if "mode" in st.session_state and st.session_state.get("_quick_ticker"):
-            st.info(f"Escribe **{st.session_state['_quick_ticker']}** en el campo Ticker y pulsa Analizar.")
+            st.info(f"Type **{st.session_state['_quick_ticker']}** in the Ticker field and press Analyze.")
 
         st.stop()
 
-    with st.spinner(f"Verificando {ticker_input}..."):
+    with st.spinner(f"Checking {ticker_input}..."):
         fw_result = firewall.run(ticker_input)
 
     if fw_result.status == "BLOCK":
-        st.error(f"Analisis bloqueado para **{ticker_input}**")
+        st.error(f"Analysis blocked for **{ticker_input}**")
         for issue in fw_result.block_issues:
             st.error(f"**{issue.message}**\n\n{issue.detail}")
-        st.info("Prueba con: KO, AAPL, JNJ, PG, MSFT")
+        st.info("Try: KO, AAPL, JNJ, PG, MSFT")
         st.stop()
 
-    with st.spinner("Calculando puntuacion..."):
+    with st.spinner("Calculating score..."):
         result = analysis.run(ticker_input)
         info = metrics.get_info(ticker_input)
 
     if fw_result.status == "WARN":
         for issue in fw_result.warn_issues:
-            st.warning(f"**Advertencia — {issue.message}**\n\n{issue.detail}")
+            st.warning(f"**Warning — {issue.message}**\n\n{issue.detail}")
 
     # --- Company header ---
     price_str = f"${result.current_price:.2f}" if result.current_price else "N/A"
@@ -990,10 +990,10 @@ if mode == "Analizar empresa":
         unsafe_allow_html=True,
     )
     h1, h2, h3, h4 = st.columns(4)
-    h1.metric("Precio actual", price_str)
-    h2.metric("Cap. de mercado", fmt_cap(result.market_cap))
+    h1.metric("Current price", price_str)
+    h2.metric("Market cap", fmt_cap(result.market_cap))
     h3.metric("Sector", result.sector)
-    h4.metric("Industria", result.industry)
+    h4.metric("Industry", result.industry)
     st.markdown("---")
 
     # --- Gauge + verdict ---
@@ -1016,7 +1016,7 @@ if mode == "Analizar empresa":
                     {"range": [max_score*0.8, max_score], "color": "#0d1f18"},
                 ],
             },
-            title={"text": "Puntuacion Buffett Total", "font": {"size": 16, "color": "#64748b"}},
+            title={"text": "Total Buffett Score", "font": {"size": 16, "color": "#64748b"}},
         ))
         fig.update_layout(
             height=280,
@@ -1044,24 +1044,24 @@ if mode == "Analizar empresa":
             f"<div style='padding:1.5rem; background:#141c2e; border:1px solid #1e2d45; "
             f"border-left:4px solid {color}; border-radius:12px; margin-top:0.5rem'>"
             f"<div style='font-size:0.72rem; text-transform:uppercase; letter-spacing:0.1em; "
-            f"color:#64748b; margin-bottom:0.4rem'>Veredicto</div>"
+            f"color:#64748b; margin-bottom:0.4rem'>Verdict</div>"
             f"<div style='font-size:1.8rem; font-weight:800; color:{color}; line-height:1.1; "
             f"margin-bottom:0.6rem'>{result.verdict}</div>"
             f"<div style='color:#94a3b8; font-size:0.88rem; line-height:1.6'>"
-            f"Puntuacion: <b style='color:#e2e8f0'>{result.total_score}/{result.total_max}</b> "
+            f"Score: <b style='color:#e2e8f0'>{result.total_score}/{result.total_max}</b> "
             f"({pct:.0f}%)<br>"
             f"<span style='font-size:0.78rem; color:#64748b'>"
-            f"80-100 solido · 60-79 radar · 40-59 precaucion · &lt;40 descartado</span>"
+            f"80-100 solid · 60-79 radar · 40-59 caution · &lt;40 discard</span>"
             f"</div>"
             f"<div style='margin-top:1rem; padding-top:0.8rem; border-top:1px solid #1e2d45'>"
             f"<div style='font-size:0.72rem; text-transform:uppercase; letter-spacing:0.1em; "
-            f"color:#64748b; margin-bottom:0.4rem'>Señal de accion</div>"
+            f"color:#64748b; margin-bottom:0.4rem'>Action signal</div>"
             f"<div style='font-size:1.3rem; font-weight:800; color:{sig_color}; "
             f"margin-bottom:0.5rem'>{sig_label}</div>"
             f"<div style='font-size:0.82rem; color:#94a3b8; line-height:1.8'>"
-            f"IV estimado: <b style='color:#e2e8f0'>{iv_display}</b><br>"
-            f"Precio objetivo compra: <b style='color:#10b981'>{buy_str}</b> &nbsp;·&nbsp; "
-            f"Precio objetivo venta: <b style='color:#ef4444'>{sell_str}</b>"
+            f"Estimated IV: <b style='color:#e2e8f0'>{iv_display}</b><br>"
+            f"Buy target: <b style='color:#10b981'>{buy_str}</b> &nbsp;·&nbsp; "
+            f"Sell target: <b style='color:#ef4444'>{sell_str}</b>"
             f"</div>"
             f"</div>"
             f"</div>",
@@ -1086,25 +1086,25 @@ if mode == "Analizar empresa":
         for c in section.criteria:
             icon = "+" if c.passed else "-"
             with st.expander(f"{icon} {c.name}  —  {c.points_earned}/{c.points_max} pts  |  {c.raw_label}"):
-                st.markdown(f"**Criterio:** {c.threshold}")
-                st.markdown(f"**Fuente:** {c.source}")
-                st.markdown(f"**Justificacion:** {c.explanation}")
+                st.markdown(f"**Criterion:** {c.threshold}")
+                st.markdown(f"**Source:** {c.source}")
+                st.markdown(f"**Justification:** {c.explanation}")
 
     tab1, tab2, tab3, tab4 = st.tabs([
         f"Moat  {result.moat.score}/25",
-        f"Valoracion  {result.valuation.score}/25",
-        f"Salud  {result.health.score}/25",
-        f"Crecimiento  {result.growth.score}/25",
+        f"Valuation  {result.valuation.score}/25",
+        f"Health  {result.health.score}/25",
+        f"Growth  {result.growth.score}/25",
     ])
     with tab1: render_section(result.moat)
     with tab2:
         render_section(result.valuation)
         # DCF sensitivity table
         if result.intrinsic_value and result.current_price:
-            with st.expander("Rango de Valor Intrinseco (sensibilidad DCF)"):
+            with st.expander("Intrinsic Value Range (DCF sensitivity)"):
                 st.caption(
-                    "Formula de Graham ajustada por tasas: IV = OE/accion × (8.5 + 2g) × (4.4 / r). "
-                    "La celda base refleja el escenario central usado en el scoring."
+                    "Graham formula adjusted for rates: IV = OE/share × (8.5 + 2g) × (4.4 / r). "
+                    "The base cell reflects the central scenario used in scoring."
                 )
                 _info_dcf = metrics.get_info(ticker_input)
                 _eps_h = metrics.get_eps_history(ticker_input)
@@ -1129,44 +1129,44 @@ if mode == "Analizar empresa":
                 if _oe_per_share:
                     _rates = [0.08, 0.10, 0.12]
                     _growths = [_g_base * 0.7, _g_base, _g_base * 1.3]
-                    _rate_labels = ["Tasa 8%", "Tasa 10% (base)", "Tasa 12%"]
+                    _rate_labels = ["Rate 8%", "Rate 10% (base)", "Rate 12%"]
                     _g_labels = [
-                        f"g={_growths[0]:.1f}% (bajo)",
+                        f"g={_growths[0]:.1f}% (low)",
                         f"g={_growths[1]:.1f}% (base)",
-                        f"g={_growths[2]:.1f}% (alto)",
+                        f"g={_growths[2]:.1f}% (high)",
                     ]
                     _tbl_rows = []
                     for _r_lbl, _r in zip(_rate_labels, _rates):
-                        _row_d = {"Tasa descuento": _r_lbl}
+                        _row_d = {"Discount rate": _r_lbl}
                         for _g_lbl, _g in zip(_g_labels, _growths):
                             _iv_cell = _oe_per_share * (8.5 + 2 * _g) * (4.4 / _r)
                             _mos = (_iv_cell - result.current_price) / _iv_cell * 100
                             _row_d[_g_lbl] = f"${_iv_cell:.2f} (MoS {_mos:+.0f}%)"
                         _tbl_rows.append(_row_d)
-                    _df_dcf = pd.DataFrame(_tbl_rows).set_index("Tasa descuento")
+                    _df_dcf = pd.DataFrame(_tbl_rows).set_index("Discount rate")
                     st.dataframe(_df_dcf, use_container_width=True)
                     _count_safe = sum(
                         1 for _r in _rates for _g in _growths
                         if _oe_per_share * (8.5 + 2 * _g) * (4.4 / _r) > result.current_price
                     )
                     st.caption(
-                        f"Precio actual ${result.current_price:.2f} ofrece margen positivo "
-                        f"en {_count_safe} de 9 escenarios."
+                        f"Current price ${result.current_price:.2f} offers positive margin "
+                        f"in {_count_safe} of 9 scenarios."
                     )
                 else:
-                    st.info("Datos insuficientes para construir la tabla de sensibilidad.")
+                    st.info("Insufficient data to build the sensitivity table.")
     with tab3: render_section(result.health)
     with tab4: render_section(result.growth)
 
     # --- Charts ---
     st.markdown("---")
-    st.subheader("Historicos")
+    st.subheader("Historical Data")
     c1, c2, c3 = st.columns(3)
     with c1:
         roe_data = metrics.get_roe_history(ticker_input)
         if roe_data["values"]:
-            df = pd.DataFrame({"Ano": roe_data["years"], "ROE": [v*100 for v in roe_data["values"]]})
-            fig = px.bar(df, x="Ano", y="ROE", title="ROE (%)", color="ROE",
+            df = pd.DataFrame({"Year": roe_data["years"], "ROE": [v*100 for v in roe_data["values"]]})
+            fig = px.bar(df, x="Year", y="ROE", title="ROE (%)", color="ROE",
                          color_continuous_scale="RdYlGn")
             fig.add_hline(y=15, line_dash="dash", line_color="#f59e0b", annotation_text="15%",
                           annotation_font_color="#f59e0b")
@@ -1174,14 +1174,14 @@ if mode == "Analizar empresa":
             fig.update_layout(showlegend=False, margin=dict(t=40, b=30))
             st.plotly_chart(fig, use_container_width=True)
         else:
-            st.info("Sin datos de ROE")
+            st.info("No ROE data")
     with c2:
         rev_data = metrics.get_revenue_history(ticker_input)
         eps_data = metrics.get_eps_history(ticker_input)
         if rev_data["values"]:
             fig = go.Figure()
             fig.add_trace(go.Scatter(x=rev_data["years"], y=[v/1e9 for v in rev_data["values"]],
-                                     mode="lines+markers", name="Ingresos ($B)", yaxis="y1",
+                                     mode="lines+markers", name="Revenue ($B)", yaxis="y1",
                                      line=dict(color="#3498db", width=2)))
             if eps_data["values"]:
                 fig.add_trace(go.Scatter(x=eps_data["years"], y=eps_data["values"],
@@ -1189,8 +1189,8 @@ if mode == "Analizar empresa":
                                          line=dict(color="#10b981", width=2, dash="dot")))
             _dark_layout(fig, height=300)
             fig.update_layout(
-                title=dict(text="Ingresos y EPS", font=dict(color="#e2e8f0")),
-                yaxis=dict(title="Ingresos ($B)", gridcolor="#1e2d45", linecolor="#2a3d5a"),
+                title=dict(text="Revenue and EPS", font=dict(color="#e2e8f0")),
+                yaxis=dict(title="Revenue ($B)", gridcolor="#1e2d45", linecolor="#2a3d5a"),
                 yaxis2=dict(title="EPS ($)", overlaying="y", side="right",
                             gridcolor="#1e2d45", linecolor="#2a3d5a"),
                 legend=dict(orientation="h", y=1.1, font=dict(color="#e2e8f0")),
@@ -1198,33 +1198,33 @@ if mode == "Analizar empresa":
             )
             st.plotly_chart(fig, use_container_width=True)
         else:
-            st.info("Sin datos de ingresos")
+            st.info("No revenue data")
     with c3:
         ph = metrics.get_price_history(ticker_input, period="5y")
         if not ph.empty:
-            fig = px.line(ph.reset_index(), x="Date", y="Close", title="Precio 5 anos")
+            fig = px.line(ph.reset_index(), x="Date", y="Close", title="5-Year Price")
             fig.update_traces(line_color="#c9a84c")
             _dark_layout(fig, height=300)
             fig.update_layout(margin=dict(t=40, b=30))
             st.plotly_chart(fig, use_container_width=True)
         else:
-            st.info("Sin datos de precio")
+            st.info("No price data")
 
     # --- Peer comparison ---
     st.markdown("---")
     st.markdown(
-        "<div class='section-header'><h3 style='margin:0; color:#e2e8f0'>Comparacion sectorial con peers</h3></div>",
+        "<div class='section-header'><h3 style='margin:0; color:#e2e8f0'>Sector comparison with peers</h3></div>",
         unsafe_allow_html=True,
     )
-    with st.spinner("Cargando comparacion sectorial..."):
+    with st.spinner("Loading sector comparison..."):
         peer_comp = peers_mod.compare(ticker_input, info)
 
     if peer_comp.peer_count == 0:
-        st.info("No hay suficientes peers disponibles para la comparacion sectorial.")
+        st.info("Not enough peers available for sector comparison.")
     else:
         st.caption(
-            f"Sector: **{peer_comp.sector}** | Industria: **{peer_comp.industry}** | "
-            f"Peers analizados: {peer_comp.peer_count} "
+            f"Sector: **{peer_comp.sector}** | Industry: **{peer_comp.industry}** | "
+            f"Peers analyzed: {peer_comp.peer_count} "
             f"({', '.join(peer_comp.peer_symbols[:5])}"
             f"{'...' if len(peer_comp.peer_symbols) > 5 else ''})"
         )
@@ -1239,7 +1239,7 @@ if mode == "Analizar empresa":
             for pcol, m in zip(peer_cols, peer_comp.metrics):
                 with pcol:
                     color = "#2ecc71" if m.better_than_peers else "#e74c3c"
-                    vs_label = "Mejor que sector" if m.better_than_peers else "Inferior al sector"
+                    vs_label = "Better than sector" if m.better_than_peers else "Below sector"
                     st.markdown(f"**{m.name}**")
                     st.markdown(
                         f"<div style='font-size:1.4rem; font-weight:bold; color:#e2e8f0'>{m.company_label}</div>"
@@ -1252,14 +1252,14 @@ if mode == "Analizar empresa":
     # --- Capital Allocation Quality (ROIC) ---
     st.markdown("---")
     st.markdown(
-        "<div class='section-header'><h3 style='margin:0; color:#e2e8f0'>Calidad de Asignacion de Capital</h3></div>",
+        "<div class='section-header'><h3 style='margin:0; color:#e2e8f0'>Capital Allocation Quality</h3></div>",
         unsafe_allow_html=True,
     )
-    with st.spinner("Calculando ROIC y calidad del capital..."):
+    with st.spinner("Calculating ROIC and capital quality..."):
         cap_data = capital_mod.get_capital_quality(ticker_input)
 
     if cap_data.get("error"):
-        st.info(f"ROIC no disponible: {cap_data['error']}")
+        st.info(f"ROIC not available: {cap_data['error']}")
     else:
         _vc = cap_data["verdict_color"]
         _vt = cap_data["verdict"]
@@ -1276,7 +1276,7 @@ if mode == "Analizar empresa":
             f"border-left:5px solid {_vc}; border-radius:10px; margin-bottom:1rem'>"
             f"<span style='font-size:1.05rem; font-weight:700; color:{_vc}'>{_vt}</span>"
             f"<span style='color:#64748b; font-size:0.85rem; margin-left:0.8rem'>"
-            f"ROIC prom: {_roic_avg:.1f}% · Tendencia: {_roic_trend}"
+            f"Avg ROIC: {_roic_avg:.1f}% · Trend: {_roic_trend}"
             f"{(' · WACC est: ' + str(_wacc) + '%') if _wacc else ''}"
             f"{(' · Spread: ' + ('+' if _spread >= 0 else '') + str(_spread) + '%') if _spread is not None else ''}"
             f"</span></div>",
@@ -1286,9 +1286,9 @@ if mode == "Analizar empresa":
         _rc1, _rc2, _rc3 = st.columns(3)
         with _rc1:
             _buyback_map = {
-                "yes": ("Recomprando acciones", "#10b981"),
-                "no": ("Diluyendo acciones", "#ef4444"),
-                "neutral": ("Sin tendencia clara", "#64748b"),
+                "yes": ("Buying back shares", "#10b981"),
+                "no": ("Diluting shares", "#ef4444"),
+                "neutral": ("No clear trend", "#64748b"),
             }
             _bb_lbl, _bb_col = _buyback_map.get(_buyback, ("—", "#64748b"))
             st.markdown(
@@ -1344,9 +1344,9 @@ if mode == "Analizar empresa":
                 )
             _dark_layout(_fig_roic, height=260)
             _fig_roic.update_layout(
-                title=dict(text="ROIC historico (%)", font=dict(color="#e2e8f0")),
+                title=dict(text="ROIC history (%)", font=dict(color="#e2e8f0")),
                 yaxis=dict(title="ROIC %", gridcolor="#1e2d45", linecolor="#2a3d5a"),
-                xaxis=dict(title="Ano", linecolor="#2a3d5a"),
+                xaxis=dict(title="Year", linecolor="#2a3d5a"),
                 margin=dict(t=50, b=30),
                 showlegend=False,
             )
@@ -1355,14 +1355,14 @@ if mode == "Analizar empresa":
     # --- Insider activity ---
     st.markdown("---")
     st.markdown(
-        "<div class='section-header'><h3 style='margin:0; color:#e2e8f0'>Actividad de Insiders</h3></div>",
+        "<div class='section-header'><h3 style='margin:0; color:#e2e8f0'>Insider Activity</h3></div>",
         unsafe_allow_html=True,
     )
-    with st.spinner("Obteniendo transacciones de insiders..."):
+    with st.spinner("Fetching insider transactions..."):
         ins_data = insider_mod.get_insider_signal(ticker_input)
 
     if ins_data.get("error"):
-        st.info(f"Datos de insiders no disponibles: {ins_data['error']}")
+        st.info(f"Insider data not available: {ins_data['error']}")
     else:
         _is_color = ins_data["signal_color"]
         _is_label = ins_data["signal_label"]
@@ -1383,7 +1383,7 @@ if mode == "Analizar empresa":
                 f"<div style='text-align:center; padding:0.8rem; background:#141c2e; "
                 f"border:1px solid #1e2d45; border-radius:10px'>"
                 f"<div style='font-size:0.7rem; color:#64748b; text-transform:uppercase; "
-                f"letter-spacing:0.08em; margin-bottom:0.3rem'>Señal (6 meses)</div>"
+                f"letter-spacing:0.08em; margin-bottom:0.3rem'>Signal (6 months)</div>"
                 f"<div style='font-size:1.1rem; font-weight:800; color:{_is_color}'>{_is_label}</div>"
                 f"</div>",
                 unsafe_allow_html=True,
@@ -1393,7 +1393,7 @@ if mode == "Analizar empresa":
                 f"<div style='text-align:center; padding:0.8rem; background:#141c2e; "
                 f"border:1px solid #1e2d45; border-radius:10px'>"
                 f"<div style='font-size:0.7rem; color:#64748b; text-transform:uppercase; "
-                f"letter-spacing:0.08em; margin-bottom:0.3rem'>Neto (compras - ventas)</div>"
+                f"letter-spacing:0.08em; margin-bottom:0.3rem'>Net (buys - sells)</div>"
                 f"<div style='font-size:1.05rem; font-weight:700; "
                 f"color:{'#10b981' if (_net_usd or 0) >= 0 else '#ef4444'}'>"
                 f"{_fmt_m(_net_usd)}</div>"
@@ -1405,10 +1405,10 @@ if mode == "Analizar empresa":
                 f"<div style='text-align:center; padding:0.8rem; background:#141c2e; "
                 f"border:1px solid #1e2d45; border-radius:10px'>"
                 f"<div style='font-size:0.7rem; color:#64748b; text-transform:uppercase; "
-                f"letter-spacing:0.08em; margin-bottom:0.3rem'>Operaciones</div>"
+                f"letter-spacing:0.08em; margin-bottom:0.3rem'>Transactions</div>"
                 f"<div style='font-size:0.9rem; font-weight:700; color:#e2e8f0'>"
-                f"<span style='color:#10b981'>{_buys} compras</span> · "
-                f"<span style='color:#ef4444'>{_sells} ventas</span></div>"
+                f"<span style='color:#10b981'>{_buys} buys</span> · "
+                f"<span style='color:#ef4444'>{_sells} sells</span></div>"
                 f"</div>",
                 unsafe_allow_html=True,
             )
@@ -1431,42 +1431,42 @@ if mode == "Analizar empresa":
                 )
 
     # --- Methodology + raw data ---
-    with st.expander("Como se calcula este analisis"):
+    with st.expander("How this analysis is calculated"):
         st.markdown("""
-**Moat (25 pts):** ROE historico a 5 anos (>15% cada ano = 15pts), margen neto >15% (5pts),
-estabilidad del margen operativo — desviacion estandar <5pp (5pts).
+**Moat (25 pts):** 5-year historical ROE (>15% each year = 15pts), net margin >15% (5pts),
+operating margin stability — standard deviation <5pp (5pts).
 
-**Valoracion (25 pts):** P/E trailing (<=15=10pts, <=25=5pts), P/B (<=1.5=8pts, <=3=4pts),
-margen de seguridad via DCF simplificado: IV = Owner Earnings/accion * (8.5 + 2*g) (7pts).
+**Valuation (25 pts):** Trailing P/E (<=15=10pts, <=25=5pts), P/B (<=1.5=8pts, <=3=4pts),
+margin of safety via simplified DCF: IV = Owner Earnings/share * (8.5 + 2*g) (7pts).
 
-**Salud (25 pts):** Deuda/Patrimonio (<0.5=10pts, <1=5pts), liquidez corriente (>=1.5=8pts, >=1=4pts),
-FCF positivo (7pts).
+**Health (25 pts):** Debt/Equity (<0.5=10pts, <1=5pts), current ratio (>=1.5=8pts, >=1=4pts),
+positive FCF (7pts).
 
-**Crecimiento (25 pts):** CAGR ingresos 5a (>=10%=8pts, >=5%=4pts), CAGR EPS 5a (>=10%=9pts, >=5%=5pts),
-CAGR valor en libros 5a (>=7%=8pts, >=3%=4pts).
+**Growth (25 pts):** Revenue CAGR 5y (>=10%=8pts, >=5%=4pts), EPS CAGR 5y (>=10%=9pts, >=5%=5pts),
+book value CAGR 5y (>=7%=8pts, >=3%=4pts).
 
-*Fuente: Warren Buffett letters to shareholders (1977-2024), The Warren Buffett Way (Hagstrom),
+*Source: Warren Buffett letters to shareholders (1977-2024), The Warren Buffett Way (Hagstrom),
 The Intelligent Investor (Graham).*
         """)
-    with st.expander("Datos brutos de yfinance"):
+    with st.expander("Raw yfinance data"):
         raw = {
             "P/E trailing": info.get("trailingPE"),
             "P/E forward": info.get("forwardPE"),
             "P/B": info.get("priceToBook"),
             "EV/EBITDA": info.get("enterpriseToEbitda"),
             "ROE": f"{(info.get('returnOnEquity') or 0)*100:.1f}%",
-            "Margen neto": f"{(info.get('profitMargins') or 0)*100:.1f}%",
+            "Net margin": f"{(info.get('profitMargins') or 0)*100:.1f}%",
             "D/E": f"{(info.get('debtToEquity') or 0)/100:.2f}x",
-            "Liquidez corriente": info.get("currentRatio"),
+            "Current ratio": info.get("currentRatio"),
             "FCF": fmt_cap(info.get("freeCashflow")),
             "Beta": info.get("beta"),
-            "52w Max": info.get("fiftyTwoWeekHigh"),
-            "52w Min": info.get("fiftyTwoWeekLow"),
+            "52w High": info.get("fiftyTwoWeekHigh"),
+            "52w Low": info.get("fiftyTwoWeekLow"),
         }
-        df = pd.DataFrame([(k, str(v) if v else "N/A") for k, v in raw.items()], columns=["Metrica", "Valor"])
+        df = pd.DataFrame([(k, str(v) if v else "N/A") for k, v in raw.items()], columns=["Metric", "Value"])
         st.dataframe(df, use_container_width=True, hide_index=True)
 
-    st.caption("Datos: Yahoo Finance. Analisis educativo — no es asesoramiento financiero.")
+    st.caption("Data: Yahoo Finance. Educational analysis — not financial advice.")
 
 
 # ===========================================================================
@@ -1476,7 +1476,7 @@ The Intelligent Investor (Graham).*
 elif mode == "Ranking":
     st.markdown(
         "<span style='font-size:2rem; font-weight:800; color:#c9a84c'>Ranking</span>"
-        "<span style='color:#64748b; font-size:1rem; margin-left:0.8rem'>Empresas analizadas</span>",
+        "<span style='color:#64748b; font-size:1rem; margin-left:0.8rem'>Companies analyzed</span>",
         unsafe_allow_html=True,
     )
 
@@ -1484,20 +1484,20 @@ elif mode == "Ranking":
     if last_run:
         try:
             dt = datetime.fromisoformat(last_run)
-            st.caption(f"Ultimo analisis: {dt.strftime('%d/%m/%Y a las %H:%M')}")
+            st.caption(f"Last analysis: {dt.strftime('%Y-%m-%d %H:%M')}")
         except Exception:
-            st.caption(f"Ultimo analisis: {last_run}")
+            st.caption(f"Last analysis: {last_run}")
     else:
         st.warning(
-            "No hay resultados en cache todavia. "
-            "Ve a **Mi Watchlist** y ejecuta el analisis batch, "
-            "o ejecuta `python3 batch.py` en la terminal."
+            "No cached results yet. "
+            "Go to **My Watchlist** and run the batch analysis, "
+            "or run `python3 batch.py` in the terminal."
         )
 
     ranked = batch.get_ranked_results()
 
     if not ranked:
-        st.info("Sin resultados. Ejecuta un analisis batch primero.")
+        st.info("No results. Run a batch analysis first.")
         st.stop()
 
     # Score distribution chart
@@ -1515,30 +1515,30 @@ elif mode == "Ranking":
         hovertext=[f"{n}<br>{s}/100 — {r.get('verdict','')}" for n, s, r in zip(names, scores, ranked)],
         hoverinfo="text",
     ))
-    fig.add_hline(y=80, line_dash="dash", line_color="#10b981", annotation_text="Solido (80)",
+    fig.add_hline(y=80, line_dash="dash", line_color="#10b981", annotation_text="Strong (80)",
                   annotation_font_color="#10b981")
-    fig.add_hline(y=60, line_dash="dash", line_color="#3b82f6", annotation_text="En radar (60)",
+    fig.add_hline(y=60, line_dash="dash", line_color="#3b82f6", annotation_text="On radar (60)",
                   annotation_font_color="#3b82f6")
-    fig.add_hline(y=40, line_dash="dot", line_color="#f59e0b", annotation_text="Precaucion (40)",
+    fig.add_hline(y=40, line_dash="dot", line_color="#f59e0b", annotation_text="Caution (40)",
                   annotation_font_color="#f59e0b")
     _dark_layout(fig, height=400)
     fig.update_layout(
-        title=dict(text="Puntuacion Buffett por empresa", font=dict(color="#e2e8f0")),
-        yaxis=dict(range=[0, 105], title="Puntuacion", gridcolor="#1e2d45", linecolor="#2a3d5a"),
+        title=dict(text="Buffett Score by Company", font=dict(color="#e2e8f0")),
+        yaxis=dict(range=[0, 105], title="Score", gridcolor="#1e2d45", linecolor="#2a3d5a"),
         xaxis=dict(title="", linecolor="#2a3d5a"),
         margin=dict(t=50, b=40),
     )
     st.plotly_chart(fig, use_container_width=True)
 
     # Ranking table
-    st.markdown("### Tabla detallada")
+    st.markdown("### Detailed Table")
 
     col_filter1, col_filter2 = st.columns([1, 2])
     with col_filter1:
-        min_score = st.slider("Puntuacion minima", 0, 100, 0, step=5)
+        min_score = st.slider("Minimum score", 0, 100, 0, step=5)
     with col_filter2:
         sectors = sorted(set(r.get("sector", "N/A") for r in ranked))
-        sector_filter = st.multiselect("Filtrar por sector", sectors, default=[])
+        sector_filter = st.multiselect("Filter by sector", sectors, default=[])
 
     filtered = [
         r for r in ranked
@@ -1550,15 +1550,15 @@ elif mode == "Ranking":
     for r in filtered:
         rows.append({
             "Ticker": r["symbol"],
-            "Empresa": r.get("company_name", "")[:30],
+            "Company": r.get("company_name", "")[:30],
             "Sector": r.get("sector", "N/A"),
             "Score": r["total_score"],
             "Moat": r.get("moat", {}).get("score", 0),
-            "Valoracion": r.get("valuation", {}).get("score", 0),
-            "Salud": r.get("health", {}).get("score", 0),
-            "Crecimiento": r.get("growth", {}).get("score", 0),
-            "Veredicto": r.get("verdict", ""),
-            "Precio": f"${r['current_price']:.2f}" if r.get("current_price") else "N/A",
+            "Valuation": r.get("valuation", {}).get("score", 0),
+            "Health": r.get("health", {}).get("score", 0),
+            "Growth": r.get("growth", {}).get("score", 0),
+            "Verdict": r.get("verdict", ""),
+            "Price": f"${r['current_price']:.2f}" if r.get("current_price") else "N/A",
         })
 
     df = pd.DataFrame(rows)
@@ -1571,20 +1571,20 @@ elif mode == "Ranking":
         # Download as CSV
         csv = df.to_csv(index=False).encode("utf-8")
         st.download_button(
-            "Descargar CSV",
+            "Download CSV",
             data=csv,
             file_name=f"buffett_ranking_{datetime.now().strftime('%Y%m%d')}.csv",
             mime="text/csv",
         )
     else:
-        st.info("No hay resultados con los filtros seleccionados.")
+        st.info("No results with the selected filters.")
 
 
 # ===========================================================================
 # MODE 3: Recomendaciones
 # ===========================================================================
 
-elif mode == "Recomendaciones":
+elif mode == "Recommendations":
 
     # Drill-down: if a symbol is selected, show detail panel instead of the list
     if st.session_state.get("rec_drill"):
@@ -1593,12 +1593,12 @@ elif mode == "Recomendaciones":
 
     st.markdown(
         "<div style='margin-bottom:0.5rem'>"
-        "<span style='font-size:2rem; font-weight:800; color:#c9a84c'>Recomendaciones</span>"
+        "<span style='font-size:2rem; font-weight:800; color:#c9a84c'>Recommendations</span>"
         "</div>"
         "<div style='color:#64748b; font-size:0.9rem; margin-bottom:1rem'>"
-        "El sistema revisa todos los resultados del analisis batch y selecciona "
-        "los mejores candidatos segun criterios Buffett. Solo aparecen empresas con "
-        "datos suficientes y puntuacion comprobada."
+        "The system reviews all batch analysis results and selects "
+        "the best candidates according to Buffett criteria. Only companies with "
+        "sufficient data and verified scores are shown."
         "</div>",
         unsafe_allow_html=True,
     )
@@ -1606,8 +1606,8 @@ elif mode == "Recomendaciones":
     all_results = batch.get_ranked_results(min_score=0)
     if not all_results:
         st.warning(
-            "Aun no hay resultados. Ve a **Mi Watchlist** y ejecuta el analisis batch, "
-            "o corre `python3 batch.py --screener` en la terminal."
+            "No results yet. Go to **My Watchlist** and run the batch analysis, "
+            "or run `python3 batch.py --screener` in the terminal."
         )
         st.stop()
 
@@ -1615,7 +1615,7 @@ elif mode == "Recomendaciones":
     if last_run:
         try:
             dt = datetime.fromisoformat(last_run)
-            st.caption(f"Basado en el analisis del {dt.strftime('%d/%m/%Y a las %H:%M')} — {len(all_results)} empresas analizadas")
+            st.caption(f"Based on analysis from {dt.strftime('%Y-%m-%d %H:%M')} — {len(all_results)} companies analyzed")
         except Exception:
             pass
 
@@ -1645,10 +1645,10 @@ elif mode == "Recomendaciones":
         health  = r.get("health", {}).get("score", 0)
         growth  = r.get("growth", {}).get("score", 0)
         strengths = []
-        if moat    >= 20: strengths.append(f"Moat fuerte ({moat}/25)")
-        if val     >= 18: strengths.append(f"Buen precio ({val}/25)")
-        if health  >= 20: strengths.append(f"Balance solido ({health}/25)")
-        if growth  >= 18: strengths.append(f"Crecimiento destacado ({growth}/25)")
+        if moat    >= 20: strengths.append(f"Strong moat ({moat}/25)")
+        if val     >= 18: strengths.append(f"Good value ({val}/25)")
+        if health  >= 20: strengths.append(f"Solid balance sheet ({health}/25)")
+        if growth  >= 18: strengths.append(f"Outstanding growth ({growth}/25)")
         sector = r.get("sector", "N/A")
         price  = f"${r['current_price']:.2f}" if r.get("current_price") else "N/A"
 
@@ -1671,15 +1671,15 @@ elif mode == "Recomendaciones":
         pct_low = pm.get("pct_from_52w_low")
         dist200 = pm.get("dist_from_200dma_pct")
         if pct_low is not None and pct_low <= 25 and dist200 is not None and dist200 < 0:
-            timing_str, timing_color = "Zona baja + bajo MA200", "#10b981"
+            timing_str, timing_color = "Low zone + below MA200", "#10b981"
         elif pct_low is not None and pct_low <= 40:
-            timing_str, timing_color = f"Zona baja ({pct_low:.0f}%)", "#3b82f6"
+            timing_str, timing_color = f"Low zone ({pct_low:.0f}%)", "#3b82f6"
         elif pct_low is not None and pct_low <= 60:
-            timing_str, timing_color = f"Zona media ({pct_low:.0f}%)", "#f59e0b"
+            timing_str, timing_color = f"Mid zone ({pct_low:.0f}%)", "#f59e0b"
         elif pct_low is not None:
-            timing_str, timing_color = f"Zona alta ({pct_low:.0f}%)", "#ef4444"
+            timing_str, timing_color = f"High zone ({pct_low:.0f}%)", "#ef4444"
         else:
-            timing_str, timing_color = "Sin datos", "#64748b"
+            timing_str, timing_color = "No data", "#64748b"
 
         st.markdown(
             f"<div style='background:#141c2e; border:1px solid #1e2d45; "
@@ -1692,13 +1692,13 @@ elif mode == "Recomendaciones":
             f"<div style='text-align:right'>"
             f"<div style='font-size:1.4rem; font-weight:800; color:{border_color}'>{sc}/100</div>"
             f"<div style='font-size:0.78rem; color:{conv_color}; font-weight:600'>"
-            f"Conviccion: {conv}/100 — {conv_label}</div>"
+            f"Conviction: {conv}/100 — {conv_label}</div>"
             f"</div>"
             f"</div>"
             f"<div style='color:#64748b; font-size:0.82rem; margin:0.25rem 0'>"
-            f"{sector} | Precio: {price}</div>"
+            f"{sector} | Price: {price}</div>"
             f"<div style='font-size:0.83rem; color:#94a3b8; margin-top:0.4rem'>"
-            f"{'  ·  '.join(strengths) if strengths else 'Puntuacion equilibrada en todos los pilares.'}"
+            f"{'  ·  '.join(strengths) if strengths else 'Balanced score across all pillars.'}"
             f"</div>"
             # Mini-badge row: MOS | Insiders | ROIC | Timing
             f"<div style='display:flex; flex-wrap:wrap; gap:0.5rem; margin-top:0.55rem; font-size:0.78rem'>"
@@ -1714,7 +1714,7 @@ elif mode == "Recomendaciones":
             f"</div>",
             unsafe_allow_html=True,
         )
-        if st.button("Ver analisis", key=f"drill_{r['symbol']}", use_container_width=True):
+        if st.button("View analysis", key=f"drill_{r['symbol']}", use_container_width=True):
             st.session_state["rec_drill"] = r["symbol"]
             st.rerun()
 
@@ -1727,9 +1727,9 @@ elif mode == "Recomendaciones":
             mos_pct = round((iv - price_v) / iv * 100) if iv > 0 and price_v > 0 else None
             rows.append({
                 "Ticker":      r["symbol"],
-                "Empresa":     r.get("company_name", "")[:35],
-                "Calidad":     r["total_score"],
-                "Conviccion":  r["_conviction"],
+                "Company":     r.get("company_name", "")[:35],
+                "Quality":     r["total_score"],
+                "Conviction":  r["_conviction"],
                 "MOS%":        f"{mos_pct:+d}%" if mos_pct is not None else "N/A",
                 "Insiders":    (r.get("insider") or {}).get("signal", "N/A"),
                 "ROIC%":       f"{(r.get('capital') or {}).get('roic_avg'):.1f}%"
@@ -1738,7 +1738,7 @@ elif mode == "Recomendaciones":
             })
         df = pd.DataFrame(rows)
         st.dataframe(df, use_container_width=True, hide_index=True)
-        st.markdown("**Ver detalle de una empresa:**")
+        st.markdown("**View company detail:**")
         cols = st.columns(min(len(tier_list), 6))
         for i, r in enumerate(tier_list):
             with cols[i % 6]:
@@ -1749,10 +1749,10 @@ elif mode == "Recomendaciones":
     # --- Candidatos solidos ---
     avg_conv_top = _avg_conviction(top_tier)
     st.markdown(
-        f"<div class='section-header'><h3 style='margin:0'>Candidatos Solidos — Score >= 80"
+        f"<div class='section-header'><h3 style='margin:0'>Strong Candidates — Score >= 80"
         f"  <span style='font-size:0.9rem; font-weight:400; color:#64748b'>"
-        f"({len(top_tier)} empresas"
-        f"{f'  |  Conviccion promedio: {avg_conv_top}/100' if top_tier else ''})</span>"
+        f"({len(top_tier)} companies"
+        f"{f'  |  Avg conviction: {avg_conv_top}/100' if top_tier else ''})</span>"
         f"</h3></div>",
         unsafe_allow_html=True,
     )
@@ -1762,17 +1762,17 @@ elif mode == "Recomendaciones":
             with cols_t[i % 2]:
                 render_rec_card(r, "#2ecc71")
     else:
-        st.info("Ningun ticker ha alcanzado 80+ puntos todavia. Amplia el screener para encontrar candidatos.")
+        st.info("No ticker has reached 80+ points yet. Expand the screener to find candidates.")
 
     st.markdown("---")
 
     # --- En el radar ---
     avg_conv_radar = _avg_conviction(radar_tier)
     st.markdown(
-        f"<div class='section-header'><h3 style='margin:0'>En el Radar — Score 60-79"
+        f"<div class='section-header'><h3 style='margin:0'>On the Radar — Score 60-79"
         f"  <span style='font-size:0.9rem; font-weight:400; color:#64748b'>"
-        f"({len(radar_tier)} empresas"
-        f"{f'  |  Conviccion promedio: {avg_conv_radar}/100' if radar_tier else ''})</span>"
+        f"({len(radar_tier)} companies"
+        f"{f'  |  Avg conviction: {avg_conv_radar}/100' if radar_tier else ''})</span>"
         f"</h3></div>",
         unsafe_allow_html=True,
     )
@@ -1782,37 +1782,37 @@ elif mode == "Recomendaciones":
             with cols_r[i % 2]:
                 render_rec_card(r, "#3498db")
     else:
-        st.info("Sin resultados en el rango 60-79.")
+        st.info("No results in the 60-79 range.")
 
     st.markdown("---")
 
     # --- A vigilar (tabla compacta) ---
-    with st.expander(f"A vigilar (Score 50-59) — {len(watch_tier)} empresas"):
+    with st.expander(f"Watch List (Score 50-59) — {len(watch_tier)} companies"):
         if watch_tier:
             _tier_table(watch_tier)
         else:
-            st.info("Sin resultados en el rango 50-59.")
+            st.info("No results in the 50-59 range.")
 
     # --- Por debajo (tabla compacta, colapsada) ---
     if below_tier:
-        with st.expander(f"Por debajo del umbral (Score < 50) — {len(below_tier)} empresas"):
+        with st.expander(f"Below threshold (Score < 50) — {len(below_tier)} companies"):
             _tier_table(below_tier)
 
-    st.caption("Analisis educativo. No es asesoramiento financiero.")
+    st.caption("Educational analysis. Not financial advice.")
 
 
 # ===========================================================================
 # MODE 4: Watchlist management
 # ===========================================================================
 
-elif mode == "Mi Watchlist":
+elif mode == "My Watchlist":
     st.markdown(
-        "<span style='font-size:2rem; font-weight:800; color:#c9a84c'>Mi Watchlist</span>",
+        "<span style='font-size:2rem; font-weight:800; color:#c9a84c'>My Watchlist</span>",
         unsafe_allow_html=True,
     )
     st.markdown(
         "<div style='color:#64748b; font-size:0.9rem; margin-bottom:1rem'>"
-        "Lista de empresas que el bot analiza en cada ejecucion programada."
+        "List of companies the bot analyzes on each scheduled run."
         "</div>",
         unsafe_allow_html=True,
     )
@@ -1822,20 +1822,20 @@ elif mode == "Mi Watchlist":
     # Add ticker
     col_add, col_btn = st.columns([3, 1])
     with col_add:
-        new_ticker = st.text_input("Anadir ticker", placeholder="ej: JNJ").strip().upper()
+        new_ticker = st.text_input("Add ticker", placeholder="e.g. JNJ").strip().upper()
     with col_btn:
         st.markdown("<br>", unsafe_allow_html=True)
-        if st.button("Anadir", use_container_width=True):
+        if st.button("Add", use_container_width=True):
             if new_ticker:
                 added = wl.add(new_ticker)
                 if added:
-                    st.success(f"{new_ticker} anadido a la watchlist.")
+                    st.success(f"{new_ticker} added to watchlist.")
                 else:
-                    st.warning(f"{new_ticker} ya esta en la watchlist.")
+                    st.warning(f"{new_ticker} is already in the watchlist.")
                 current = wl.load()
 
     st.markdown("---")
-    st.subheader(f"Empresas en watchlist ({len(current)})")
+    st.subheader(f"Companies in watchlist ({len(current)})")
 
     # Show each with remove button
     for ticker in current:
@@ -1853,31 +1853,31 @@ elif mode == "Mi Watchlist":
                     unsafe_allow_html=True,
                 )
             else:
-                st.caption("Sin analisis reciente")
+                st.caption("No recent analysis")
         with col_rm:
-            if st.button("Quitar", key=f"rm_{ticker}"):
+            if st.button("Remove", key=f"rm_{ticker}"):
                 wl.remove(ticker)
                 st.rerun()
 
     st.markdown("---")
 
     # Batch run button
-    st.subheader("Ejecutar analisis batch")
+    st.subheader("Run batch analysis")
     col_opt1, col_opt2 = st.columns(2)
     with col_opt1:
-        include_screener = st.checkbox("Incluir candidatos del screener S&P 500", value=False)
+        include_screener = st.checkbox("Include S&P 500 screener candidates", value=False)
     with col_opt2:
-        force_refresh = st.checkbox("Forzar re-analisis (ignorar cache)", value=False)
+        force_refresh = st.checkbox("Force re-analysis (ignore cache)", value=False)
 
-    if st.button("Analizar watchlist ahora", type="primary"):
+    if st.button("Analyze watchlist now", type="primary"):
         tickers_to_run = list(current)
         if include_screener:
-            with st.spinner("Obteniendo candidatos del screener..."):
+            with st.spinner("Fetching screener candidates..."):
                 import screener as sc
                 candidates = sc.get_candidates(use_cache=True)
                 existing = set(tickers_to_run)
                 tickers_to_run += [t for t in candidates if t not in existing]
-            st.info(f"Screener anadio {len(tickers_to_run) - len(current)} candidatos nuevos")
+            st.info(f"Screener added {len(tickers_to_run) - len(current)} new candidates")
 
         progress_bar = st.progress(0)
         status_text = st.empty()
@@ -1889,34 +1889,34 @@ elif mode == "Mi Watchlist":
             status_text.text(f"[{current_n}/{total_n}] {ticker}: {status}")
 
         cache_hours = None if force_refresh else 11
-        with st.spinner(f"Analizando {total} empresas..."):
+        with st.spinner(f"Analyzing {total} companies..."):
             batch.run(tickers_to_run, use_cache_age_hours=cache_hours, progress_callback=ui_progress)
 
         progress_bar.progress(1.0)
-        status_text.text("Analisis completado.")
-        st.success(f"Analisis completado. Ve a **Ranking** para ver los resultados.")
+        status_text.text("Analysis complete.")
+        st.success(f"Analysis complete. Go to **Ranking** to see the results.")
         st.rerun()
 
     # Scheduler instructions
-    with st.expander("Como automatizar el analisis (scheduler)"):
+    with st.expander("How to automate analysis (scheduler)"):
         st.markdown("""
-**Opcion 1 — Terminal simple (recomendado para empezar):**
+**Option 1 — Simple terminal (recommended to start):**
 ```bash
 cd warren_buffett_bot
 python3 scheduler.py --interval daily --screener --run-now
 ```
-Corre de lunes a viernes a las 17:00 (hora ET, despues del cierre del mercado).
+Runs Monday through Friday at 17:00 ET (after market close).
 
-**Opcion 2 — Auto-inicio en macOS:**
+**Option 2 — Auto-start on macOS:**
 ```bash
 python3 scheduler.py --launchd
 ```
-Imprime las instrucciones para crear un LaunchAgent que arranca con el sistema.
+Prints instructions to create a LaunchAgent that starts with the system.
 
-**El scheduler:**
-- Analiza tu watchlist + candidatos del screener
-- Guarda resultados en `data/results_cache.json`
-- La app Streamlit lee ese archivo — no necesita estar corriendo el scheduler
+**The scheduler:**
+- Analyzes your watchlist + screener candidates
+- Saves results in `data/results_cache.json`
+- The Streamlit app reads that file — the scheduler does not need to be running
         """)
 
 
@@ -1924,7 +1924,7 @@ Imprime las instrucciones para crear un LaunchAgent que arranca con el sistema.
 # MODE 4: Screener Global
 # ===========================================================================
 
-elif mode == "Screener Global":
+elif mode == "Global Screener":
     import screener as sc
     import os, json
 
@@ -1934,16 +1934,16 @@ elif mode == "Screener Global":
     )
     st.markdown(
         "<div style='color:#64748b; font-size:0.9rem; margin-bottom:1rem'>"
-        "Selecciona los mercados que quieres escanear. El screener aplica un "
-        "<b style='color:#e2e8f0'>filtro rapido</b> "
-        "(ROE &gt; 12%, D/E &lt; 1.5, cap &gt; $300M, margen positivo) "
-        "para reducir el universo a candidatos reales antes del analisis Buffett completo."
+        "Select the markets you want to scan. The screener applies a "
+        "<b style='color:#e2e8f0'>quick filter</b> "
+        "(ROE &gt; 12%, D/E &lt; 1.5, cap &gt; $300M, positive margin) "
+        "to narrow the universe to real candidates before the full Buffett analysis."
         "</div>",
         unsafe_allow_html=True,
     )
 
     # --- Market selection by region (persisted across sessions) ---
-    st.subheader("Seleccionar mercados")
+    st.subheader("Select markets")
     _saved_markets = prefs_mod.get("selected_markets", ["us_sp500"])
     regions = mkt.markets_by_region()
     selected_markets = []
@@ -1958,7 +1958,7 @@ elif mode == "Screener Global":
                     selected_markets.append(key)
 
     if not selected_markets:
-        st.info("Selecciona al menos un mercado para continuar.")
+        st.info("Select at least one market to continue.")
         st.stop()
 
     # --- Cache info ---
@@ -1975,25 +1975,25 @@ elif mode == "Screener Global":
                     sc_cache = json.load(f)
                 ts = datetime.fromisoformat(sc_cache["timestamp"])
                 st.info(
-                    f"Cache disponible: **{len(sc_cache['candidates'])} candidatos** "
-                    f"de {sc_cache.get('total_universe', '?')} empresas. "
-                    f"Actualizado: {ts.strftime('%d/%m/%Y %H:%M')}"
+                    f"Cache available: **{len(sc_cache['candidates'])} candidates** "
+                    f"from {sc_cache.get('total_universe', '?')} companies. "
+                    f"Updated: {ts.strftime('%Y-%m-%d %H:%M')}"
                 )
             except Exception:
-                st.warning("Cache no disponible o corrupto. Ejecuta el screener.")
+                st.warning("Cache not available or corrupted. Run the screener.")
     with col_btn:
-        run_screener_btn = st.button("Ejecutar screener", type="primary", use_container_width=True)
+        run_screener_btn = st.button("Run screener", type="primary", use_container_width=True)
 
     if run_screener_btn:
         import time as _time
         import yfinance as yf
 
-        with st.spinner(f"Obteniendo tickers de {len(selected_markets)} mercados..."):
+        with st.spinner(f"Fetching tickers from {len(selected_markets)} markets..."):
             universe = mkt.get_tickers_multi(selected_markets)
 
         progress_bar = st.progress(0)
         status_txt = st.empty()
-        status_txt.text(f"Universo: {len(universe)} tickers. Aplicando pre-filtro...")
+        status_txt.text(f"Universe: {len(universe)} tickers. Applying pre-filter...")
 
         total = len(universe)
         candidates = []
@@ -2016,10 +2016,10 @@ elif mode == "Screener Global":
                 pass
             _time.sleep(0.3)
             progress_bar.progress((i + 1) / total)
-            status_txt.text(f"[{i+1}/{total}] — {len(candidates)} candidatos hasta ahora")
+            status_txt.text(f"[{i+1}/{total}] — {len(candidates)} candidates so far")
 
         progress_bar.progress(1.0)
-        status_txt.text(f"Screener completo: {len(candidates)} candidatos encontrados.")
+        status_txt.text(f"Screener complete: {len(candidates)} candidates found.")
 
         os.makedirs(os.path.join(os.path.dirname(__file__), "data"), exist_ok=True)
         with open(cache_path, "w") as f:
@@ -2031,7 +2031,7 @@ elif mode == "Screener Global":
             }, f, indent=2)
         # Remember this market selection for next session
         prefs_mod.set_pref("selected_markets", selected_markets)
-        st.success(f"{len(candidates)} empresas pasaron el filtro rapido de Buffett.")
+        st.success(f"{len(candidates)} companies passed Buffett's quick filter.")
         st.rerun()
 
     # --- Show candidates ---
@@ -2044,7 +2044,7 @@ elif mode == "Screener Global":
             candidates = []
 
         if candidates:
-            st.markdown(f"### {len(candidates)} candidatos pre-filtrados")
+            st.markdown(f"### {len(candidates)} pre-filtered candidates")
 
             batch_cache = batch.load_cache().get("results", {})
             current_wl = wl.load()
@@ -2055,97 +2055,97 @@ elif mode == "Screener Global":
                 score = r.get("total_score") if has_result else None
                 rows.append({
                     "Ticker": t,
-                    "Puntuacion": score if score is not None else "Pendiente",
-                    "Veredicto": r.get("verdict", "—") if has_result else "—",
+                    "Score": score if score is not None else "Pending",
+                    "Verdict": r.get("verdict", "—") if has_result else "—",
                     "Sector": r.get("sector", "—") if has_result else "—",
-                    "En watchlist": "Si" if t in current_wl else "No",
+                    "In watchlist": "Yes" if t in current_wl else "No",
                 })
             df = pd.DataFrame(rows)
-            analyzed = df[df["Puntuacion"] != "Pendiente"].copy()
-            pending = df[df["Puntuacion"] == "Pendiente"]
+            analyzed = df[df["Score"] != "Pending"].copy()
+            pending = df[df["Score"] == "Pending"]
 
             if not analyzed.empty:
-                analyzed["Puntuacion"] = analyzed["Puntuacion"].astype(int)
-                analyzed = analyzed.sort_values("Puntuacion", ascending=False)
-                st.markdown("**Analizados:**")
+                analyzed["Score"] = analyzed["Score"].astype(int)
+                analyzed = analyzed.sort_values("Score", ascending=False)
+                st.markdown("**Analyzed:**")
                 st.dataframe(
-                    _score_style(analyzed, "Puntuacion"),
+                    _score_style(analyzed, "Score"),
                     use_container_width=True, hide_index=True,
                 )
 
             if not pending.empty:
-                st.markdown(f"**Pendientes de analisis: {len(pending)}**")
+                st.markdown(f"**Pending analysis: {len(pending)}**")
                 st.caption(
-                    "Ve a **Mi Watchlist** y ejecuta el analisis batch con "
-                    "'Incluir candidatos del screener' para puntuarlos."
+                    "Go to **My Watchlist** and run the batch analysis with "
+                    "'Include S&P 500 screener candidates' to score them."
                 )
                 st.dataframe(pending, use_container_width=True, hide_index=True)
 
             st.markdown("---")
             ticker_to_add = st.selectbox(
-                "Anadir candidato a mi watchlist",
+                "Add candidate to my watchlist",
                 options=[""] + candidates,
             )
-            if ticker_to_add and st.button(f"Anadir {ticker_to_add} a watchlist"):
+            if ticker_to_add and st.button(f"Add {ticker_to_add} to watchlist"):
                 added = wl.add(ticker_to_add)
-                st.success(f"{ticker_to_add} anadido." if added else f"{ticker_to_add} ya estaba en tu watchlist.")
+                st.success(f"{ticker_to_add} added." if added else f"{ticker_to_add} is already in your watchlist.")
 
-    st.caption("Datos: Wikipedia + Yahoo Finance. Analisis educativo — no es asesoramiento financiero.")
+    st.caption("Data: Wikipedia + Yahoo Finance. Educational analysis — not financial advice.")
 
 
 # ===========================================================================
 # MODE 5: Mi Portafolio
 # ===========================================================================
 
-elif mode == "Mi Portafolio":
+elif mode == "My Portfolio":
     st.markdown(
-        "<span style='font-size:2rem; font-weight:800; color:#c9a84c'>Mi Portafolio</span>",
+        "<span style='font-size:2rem; font-weight:800; color:#c9a84c'>My Portfolio</span>",
         unsafe_allow_html=True,
     )
     st.markdown(
         "<div style='color:#64748b; font-size:0.9rem; margin-bottom:1rem'>"
-        "Define tus posiciones y analiza la calidad y diversificacion de tu portafolio "
-        "segun los criterios de Warren Buffett."
+        "Define your positions and analyze the quality and diversification of your portfolio "
+        "according to Warren Buffett's criteria."
         "</div>",
         unsafe_allow_html=True,
     )
 
     # --- Add / update holding ---
-    st.subheader("Gestionar posiciones")
+    st.subheader("Manage positions")
     col_sym, col_w, col_ep, col_ed, col_btn = st.columns([2, 1, 1, 1, 1])
     with col_sym:
-        new_sym = st.text_input("Ticker", placeholder="ej: AAPL").strip().upper()
+        new_sym = st.text_input("Ticker", placeholder="e.g. AAPL").strip().upper()
     with col_w:
-        new_weight = st.number_input("Peso (%)", min_value=0.1, max_value=100.0, value=10.0, step=0.5)
+        new_weight = st.number_input("Weight (%)", min_value=0.1, max_value=100.0, value=10.0, step=0.5)
     with col_ep:
         new_entry_price = st.number_input(
-            "Precio entrada ($)", min_value=0.0, value=0.0, step=0.01,
-            format="%.2f", help="Precio al que compraste. 0 = no registrar."
+            "Entry price ($)", min_value=0.0, value=0.0, step=0.01,
+            format="%.2f", help="Price at which you bought. 0 = do not record."
         )
     with col_ed:
         new_entry_date = st.text_input(
-            "Fecha entrada", placeholder="2024-01-15",
-            help="Formato YYYY-MM-DD. Opcional."
+            "Entry date", placeholder="2024-01-15",
+            help="Format YYYY-MM-DD. Optional."
         ).strip()
     with col_btn:
         st.markdown("<br>", unsafe_allow_html=True)
-        if st.button("Anadir / Actualizar", use_container_width=True):
+        if st.button("Add / Update", use_container_width=True):
             if new_sym:
                 ep = new_entry_price if new_entry_price > 0 else None
                 ed = new_entry_date if new_entry_date else None
                 portfolio_mod.upsert_with_basis(new_sym, new_weight, ep, ed)
-                st.success(f"{new_sym} guardado con peso {new_weight:.1f}%")
+                st.success(f"{new_sym} saved with weight {new_weight:.1f}%")
                 st.rerun()
 
     holdings_raw = portfolio_mod.load()
     if not holdings_raw:
-        st.info("Tu portafolio esta vacio. Anade posiciones arriba.")
+        st.info("Your portfolio is empty. Add positions above.")
         st.stop()
 
     # --- Current holdings ---
     st.markdown("---")
     total_w = sum(h.get("weight", 0) for h in holdings_raw)
-    st.subheader(f"Posiciones actuales ({len(holdings_raw)}) — Peso total: {total_w:.1f}%")
+    st.subheader(f"Current positions ({len(holdings_raw)}) — Total weight: {total_w:.1f}%")
     for h in holdings_raw:
         sym = h["symbol"]
         norm_w = h["weight"] / total_w if total_w > 0 else 0
@@ -2155,28 +2155,28 @@ elif mode == "Mi Portafolio":
         with c_bar:
             st.progress(min(norm_w, 1.0))
         with c_rm:
-            if st.button("Quitar", key=f"prm_{sym}"):
+            if st.button("Remove", key=f"prm_{sym}"):
                 portfolio_mod.remove(sym)
                 st.rerun()
 
     # --- Portfolio analysis ---
     st.markdown("---")
-    st.subheader("Analisis del portafolio")
-    with st.spinner("Calculando analisis Buffett del portafolio..."):
+    st.subheader("Portfolio analysis")
+    with st.spinner("Calculating Buffett portfolio analysis..."):
         pa = portfolio_mod.analyze()
 
     if pa is None:
         st.warning(
-            "No hay datos de analisis Buffett para las posiciones del portafolio. "
-            "Ve a **Mi Watchlist**, anade tus tickers y ejecuta el analisis batch primero."
+            "No Buffett analysis data found for the portfolio positions. "
+            "Go to **My Watchlist**, add your tickers and run the batch analysis first."
         )
     else:
         # Summary metrics
         if pa.weighted_score is not None:
             mc1, mc2, mc3 = st.columns(3)
-            mc1.metric("Score Buffett ponderado", f"{pa.weighted_score:.0f}/100")
-            mc2.metric("Diversificacion", pa.diversification_score)
-            mc3.metric("Posiciones con analisis", len(pa.holdings))
+            mc1.metric("Weighted Buffett score", f"{pa.weighted_score:.0f}/100")
+            mc2.metric("Diversification", pa.diversification_score)
+            mc3.metric("Positions with analysis", len(pa.holdings))
 
         st.markdown(
             f"<div style='font-size:1.05rem; font-weight:600; margin:1rem 0; "
@@ -2193,11 +2193,11 @@ elif mode == "Mi Portafolio":
                 f"<div style='padding:0.9rem 1.2rem; background:#141c2e; border:1px solid #1e2d45; "
                 f"border-left:5px solid {_alpha_color}; border-radius:10px; margin-bottom:1rem'>"
                 f"<div style='font-size:0.72rem; text-transform:uppercase; letter-spacing:0.1em; "
-                f"color:#64748b; margin-bottom:0.3rem'>Rendimiento vs S&P500 (anualizado)</div>"
+                f"color:#64748b; margin-bottom:0.3rem'>Performance vs S&P500 (annualized)</div>"
                 f"<div style='font-size:1.15rem; font-weight:800; color:{_alpha_color}'>"
-                f"Alpha: {_alpha_sign}{pa.portfolio_alpha:.2f}% anualizado</div>"
+                f"Alpha: {_alpha_sign}{pa.portfolio_alpha:.2f}% annualized</div>"
                 f"<div style='font-size:0.83rem; color:#94a3b8; margin-top:0.3rem'>"
-                f"S&P500 desde tu entrada mas antigua: {pa.sp500_return_pct:.2f}% anualizado"
+                f"S&P500 since your earliest entry: {pa.sp500_return_pct:.2f}% annualized"
                 f"</div></div>",
                 unsafe_allow_html=True,
             )
@@ -2211,11 +2211,11 @@ elif mode == "Mi Portafolio":
         with ch1:
             if pa.sector_weights:
                 sec_df = pd.DataFrame([
-                    {"Sector": s, "Peso (%)": round(w * 100, 1)}
+                    {"Sector": s, "Weight (%)": round(w * 100, 1)}
                     for s, w in pa.sector_weights.items()
                 ])
-                fig = px.pie(sec_df, values="Peso (%)", names="Sector",
-                             title="Distribucion por sector", hole=0.4)
+                fig = px.pie(sec_df, values="Weight (%)", names="Sector",
+                             title="Sector distribution", hole=0.4)
                 _dark_layout(fig, height=350)
                 fig.update_layout(margin=dict(t=50, b=20),
                                   legend=dict(font=dict(color="#e2e8f0")))
@@ -2224,25 +2224,25 @@ elif mode == "Mi Portafolio":
         with ch2:
             if pa.score_category_weights:
                 cat_colors = {
-                    "Candidato solido": "#2ecc71",
-                    "En radar": "#3498db",
-                    "Con precaucion": "#e67e22",
-                    "No cumple": "#e74c3c",
-                    "Sin analisis": "#95a5a6",
+                    "Strong candidate": "#2ecc71",
+                    "On radar": "#3498db",
+                    "With caution": "#e67e22",
+                    "Does not qualify": "#e74c3c",
+                    "Not analyzed": "#95a5a6",
                 }
                 cat_df = pd.DataFrame([
-                    {"Categoria": c, "Peso (%)": round(w * 100, 1)}
+                    {"Category": c, "Weight (%)": round(w * 100, 1)}
                     for c, w in pa.score_category_weights.items()
                 ])
-                fig = px.bar(cat_df, x="Categoria", y="Peso (%)",
-                             title="Calidad Buffett del portafolio",
-                             color="Categoria", color_discrete_map=cat_colors)
+                fig = px.bar(cat_df, x="Category", y="Weight (%)",
+                             title="Buffett portfolio quality",
+                             color="Category", color_discrete_map=cat_colors)
                 _dark_layout(fig, height=350)
                 fig.update_layout(showlegend=False, margin=dict(t=50, b=20))
                 st.plotly_chart(fig, use_container_width=True)
 
         # Holdings table with P&L
-        st.markdown("### Detalle de posiciones")
+        st.markdown("### Position detail")
         h_rows = []
         for h in pa.holdings:
             pnl_str  = (f"{'+' if (h.unrealized_pnl_pct or 0) >= 0 else ''}"
@@ -2255,15 +2255,15 @@ elif mode == "Mi Portafolio":
             cur_str  = f"${h.current_price:.2f}" if h.current_price else "N/A"
             h_rows.append({
                 "Ticker":        h.symbol,
-                "Empresa":       h.company_name[:22] if h.company_name else "—",
+                "Company":       h.company_name[:22] if h.company_name else "—",
                 "Sector":        h.sector or "—",
-                "Peso (%)":      f"{h.weight * 100:.1f}%",
+                "Weight (%)":    f"{h.weight * 100:.1f}%",
                 "Score":         h.buffett_score if h.buffett_score is not None else "—",
-                "P. entrada":    ep_str,
-                "P. actual":     cur_str,
-                "P&L total":     pnl_str,
-                "Anualizado":    ann_str,
-                "Veredicto":     h.verdict or "—",
+                "Entry price":   ep_str,
+                "Current price": cur_str,
+                "Total P&L":     pnl_str,
+                "Annualized":    ann_str,
+                "Verdict":       h.verdict or "—",
             })
         st.dataframe(pd.DataFrame(h_rows), use_container_width=True, hide_index=True)
 
@@ -2271,11 +2271,11 @@ elif mode == "Mi Portafolio":
             tc, wc = st.columns(2)
             with tc:
                 st.success(
-                    f"Mejor posicion: **{pa.top_holding.symbol}** — {pa.top_holding.buffett_score}/100"
+                    f"Best position: **{pa.top_holding.symbol}** — {pa.top_holding.buffett_score}/100"
                 )
             with wc:
                 st.warning(
-                    f"Posicion mas debil: **{pa.weakest_holding.symbol}** — {pa.weakest_holding.buffett_score}/100"
+                    f"Weakest position: **{pa.weakest_holding.symbol}** — {pa.weakest_holding.buffett_score}/100"
                 )
 
     # ---------------------------------------------------------------------------
@@ -2283,21 +2283,21 @@ elif mode == "Mi Portafolio":
     # ---------------------------------------------------------------------------
     st.markdown("---")
     st.markdown(
-        "<div class='section-header'><h3 style='margin:0'>Planificador de entrada</h3></div>",
+        "<div class='section-header'><h3 style='margin:0'>Entry planner</h3></div>",
         unsafe_allow_html=True,
     )
     st.markdown(
         "<div style='color:#64748b; font-size:0.9rem; margin-bottom:1rem'>"
-        "Basado en las empresas con mayor conviccion en el analisis batch, el planificador "
-        "calcula cuanto capital asignar a cada una segun su indice de conviccion, "
-        "con limites de concentracion para gestionar el riesgo."
+        "Based on the companies with the highest conviction in the batch analysis, the planner "
+        "calculates how much capital to allocate to each one according to its conviction index, "
+        "with concentration limits to manage risk."
         "</div>",
         unsafe_allow_html=True,
     )
 
     _plan_results = batch.get_ranked_results(min_score=0)
     if not _plan_results:
-        st.info("Ejecuta el analisis batch primero para usar el planificador.")
+        st.info("Run the batch analysis first to use the planner.")
     else:
         # Pre-compute conviction for all results
         for _r in _plan_results:
@@ -2307,20 +2307,20 @@ elif mode == "Mi Portafolio":
         _pc1, _pc2, _pc3 = st.columns(3)
         with _pc1:
             _capital = st.number_input(
-                "Capital disponible (USD)",
+                "Available capital (USD)",
                 min_value=100, max_value=10_000_000,
                 value=20_000, step=1_000,
-                help="Cuanto dinero tienes para invertir en esta ronda."
+                help="How much money you have to invest in this round."
             )
         with _pc2:
             _n_pos = st.slider(
-                "Numero de posiciones", min_value=3, max_value=10, value=6,
-                help="Cuantas empresas diferentes quieres tener. Mas posiciones = menos riesgo concentrado."
+                "Number of positions", min_value=3, max_value=10, value=6,
+                help="How many different companies you want to hold. More positions = less concentrated risk."
             )
         with _pc3:
             _min_conv = st.slider(
-                "Conviccion minima", min_value=35, max_value=75, value=50, step=5,
-                help="Solo incluir empresas con conviccion >= este valor."
+                "Minimum conviction", min_value=35, max_value=75, value=50, step=5,
+                help="Only include companies with conviction >= this value."
             )
 
         # Filter and select top N candidates by conviction
@@ -2330,7 +2330,7 @@ elif mode == "Mi Portafolio":
         ][:_n_pos]
 
         if not _candidates:
-            st.warning(f"No hay empresas con conviccion >= {_min_conv}. Reduce el umbral minimo.")
+            st.warning(f"No companies with conviction >= {_min_conv}. Lower the minimum threshold.")
         else:
             _total_conv = sum(_r["_conviction"] for _r in _candidates) or 1
 
@@ -2350,19 +2350,19 @@ elif mode == "Mi Portafolio":
                 _sector     = _r.get("sector", "Otro")
                 _sector_alloc[_sector] = _sector_alloc.get(_sector, 0) + _w
                 _alloc_rows.append({
-                    "Ticker":       _r["symbol"],
-                    "Empresa":      _r.get("company_name", "")[:30],
-                    "Calidad":      f"{_r['total_score']}/100",
-                    "Conviccion":   f"{_r['_conviction']}/100  {_r['_conv_label']}",
-                    "Peso":         f"{_w:.1%}",
-                    "Capital USD":  f"${_dollars:,.0f}",
-                    "Acciones*":    str(_shares_est) if _shares_est else "N/A",
-                    "Precio actual":f"${_price_now:.2f}" if _price_now else "N/A",
-                    "Sector":       _sector,
+                    "Ticker":         _r["symbol"],
+                    "Company":        _r.get("company_name", "")[:30],
+                    "Quality":        f"{_r['total_score']}/100",
+                    "Conviction":     f"{_r['_conviction']}/100  {_r['_conv_label']}",
+                    "Weight":         f"{_w:.1%}",
+                    "Capital USD":    f"${_dollars:,.0f}",
+                    "Shares*":        str(_shares_est) if _shares_est else "N/A",
+                    "Current price":  f"${_price_now:.2f}" if _price_now else "N/A",
+                    "Sector":         _sector,
                 })
 
             st.dataframe(pd.DataFrame(_alloc_rows), use_container_width=True, hide_index=True)
-            st.caption("* Acciones estimadas = Capital / Precio actual. Verificar precio real antes de operar.")
+            st.caption("* Estimated shares = Capital / Current price. Verify actual price before trading.")
 
             # Sector concentration warnings
             _sector_alerts = [
@@ -2370,44 +2370,44 @@ elif mode == "Mi Portafolio":
             ]
             if _sector_alerts:
                 st.warning(
-                    f"Concentracion alta por sector (> 35%): {', '.join(_sector_alerts)}. "
-                    "Considera reducir posiciones en ese sector."
+                    f"High sector concentration (> 35%): {', '.join(_sector_alerts)}. "
+                    "Consider reducing positions in that sector."
                 )
 
             # Summary metrics
             _sm1, _sm2, _sm3, _sm4 = st.columns(4)
-            _sm1.metric("Capital a invertir", f"${_capital:,.0f}")
-            _sm2.metric("Posiciones", len(_candidates))
-            _sm3.metric("Conviccion promedio", f"{sum(_r['_conviction'] for _r in _candidates)//len(_candidates)}/100")
-            _sm4.metric("Sectores distintos", len(_sector_alloc))
+            _sm1.metric("Capital to invest", f"${_capital:,.0f}")
+            _sm2.metric("Positions", len(_candidates))
+            _sm3.metric("Avg conviction", f"{sum(_r['_conviction'] for _r in _candidates)//len(_candidates)}/100")
+            _sm4.metric("Distinct sectors", len(_sector_alloc))
 
-    st.caption("Analisis educativo basado en datos de Yahoo Finance — no es asesoramiento financiero.")
+    st.caption("Educational analysis based on Yahoo Finance data — not financial advice.")
 
 
 # ===========================================================================
 # MODE 6: Contexto Macro
 # ===========================================================================
 
-elif mode == "Contexto Macro":
+elif mode == "Macro Context":
     st.markdown(
-        "<span style='font-size:2rem; font-weight:800; color:#c9a84c'>Contexto Macro</span>",
+        "<span style='font-size:2rem; font-weight:800; color:#c9a84c'>Macro Context</span>",
         unsafe_allow_html=True,
     )
     st.markdown(
         "<div style='color:#64748b; font-size:0.9rem; margin-bottom:1rem'>"
-        "El entorno macro afecta directamente la interpretacion de los criterios Buffett. "
-        "Un P/E de 20x con tasas al 5% es caro; el mismo P/E con tasas al 1% puede ser razonable."
+        "The macro environment directly affects the interpretation of Buffett's criteria. "
+        "A P/E of 20x with rates at 5% is expensive; the same P/E with rates at 1% can be reasonable."
         "</div>",
         unsafe_allow_html=True,
     )
 
-    with st.spinner("Obteniendo indicadores macroeconomicos..."):
+    with st.spinner("Fetching macroeconomic indicators..."):
         try:
             macro_env = macro_mod.fetch()
             fetch_ok = True
         except Exception as e:
             fetch_ok = False
-            st.error(f"Error al obtener datos macro: {e}")
+            st.error(f"Error fetching macro data: {e}")
 
     if not fetch_ok:
         st.stop()
@@ -2420,7 +2420,7 @@ elif mode == "Contexto Macro":
     # Key alerts
     if macro_env.key_alerts:
         for alert in macro_env.key_alerts:
-            st.warning(f"Alerta: {alert}")
+            st.warning(f"Alert: {alert}")
 
     st.markdown("---")
 
@@ -2433,10 +2433,10 @@ elif mode == "Contexto Macro":
         "tasas_bajas": "#2ecc71",
     }
     rate_labels = {
-        "tasas_muy_altas": "Tasas MUY ALTAS — valorizacion mas exigente",
-        "tasas_altas": "Tasas ALTAS — descuentos mas altos en DCF",
-        "tasas_moderadas": "Tasas MODERADAS — entorno neutro",
-        "tasas_bajas": "Tasas BAJAS — valorizaciones mas generosas",
+        "tasas_muy_altas": "VERY HIGH rates — more demanding valuation",
+        "tasas_altas": "HIGH rates — higher discount rates in DCF",
+        "tasas_moderadas": "MODERATE rates — neutral environment",
+        "tasas_bajas": "LOW rates — more generous valuations",
     }
     env_color = rate_colors.get(rate_env, "#95a5a6")
     env_label = rate_labels.get(rate_env, rate_env)
@@ -2444,7 +2444,7 @@ elif mode == "Contexto Macro":
         f"<div style='padding:0.8rem 1.2rem; border-radius:10px; background:#141c2e; "
         f"border:1px solid #1e2d45; border-left:5px solid {env_color}'>"
         f"<div style='font-size:0.72rem; text-transform:uppercase; letter-spacing:0.08em; "
-        f"color:#64748b; margin-bottom:0.3rem'>Entorno de tasas</div>"
+        f"color:#64748b; margin-bottom:0.3rem'>Rate environment</div>"
         f"<div style='font-weight:700; color:{env_color}; font-size:1.05rem'>{env_label}</div>"
         f"</div>",
         unsafe_allow_html=True,
@@ -2460,19 +2460,19 @@ elif mode == "Contexto Macro":
                 if indicator.change_1y is not None:
                     sign = "+" if indicator.change_1y >= 0 else ""
                     unit = " pp" if indicator.unit == "%" else ""
-                    delta_str = f"{sign}{indicator.change_1y:.2f}{unit} vs hace 1 ano"
+                    delta_str = f"{sign}{indicator.change_1y:.2f}{unit} vs 1 year ago"
                 st.metric(
                     label=indicator.name,
                     value=indicator.label,
                     delta=delta_str,
                 )
             with col_interp:
-                st.markdown(f"**Situacion actual:** {indicator.interpretation}")
-                st.markdown(f"**Impacto en analisis Buffett:** {indicator.impact_on_buffett}")
+                st.markdown(f"**Current situation:** {indicator.interpretation}")
+                st.markdown(f"**Impact on Buffett analysis:** {indicator.impact_on_buffett}")
 
     st.caption(
-        "Fuentes: Yahoo Finance (^TNX, ^IRX, ^VIX, ^GSPC, DX-Y.NYB, GC=F). "
-        "Analisis educativo — no es asesoramiento financiero."
+        "Sources: Yahoo Finance (^TNX, ^IRX, ^VIX, ^GSPC, DX-Y.NYB, GC=F). "
+        "Educational analysis — not financial advice."
     )
 
 
@@ -2480,16 +2480,16 @@ elif mode == "Contexto Macro":
 # MODE 7: ETFs con Dividendos
 # ===========================================================================
 
-elif mode == "ETFs con Dividendos":
+elif mode == "Dividend ETFs":
     st.markdown(
-        "<span style='font-size:2rem; font-weight:800; color:#c9a84c'>ETFs con Dividendos</span>",
+        "<span style='font-size:2rem; font-weight:800; color:#c9a84c'>Dividend ETFs</span>",
         unsafe_allow_html=True,
     )
     st.markdown(
         "<div style='color:#64748b; font-size:0.9rem; margin-bottom:1rem'>"
-        "Evalua ETFs de dividendos en <b style='color:#e2e8f0'>5 pilares</b> (100 puntos): "
-        "Yield, Costo (expense ratio), Escala (AUM), Consistencia del dividendo "
-        "y Crecimiento total."
+        "Evaluate dividend ETFs across <b style='color:#e2e8f0'>5 pillars</b> (100 points): "
+        "Yield, Cost (expense ratio), Scale (AUM), Dividend consistency "
+        "and Total growth."
         "</div>",
         unsafe_allow_html=True,
     )
@@ -2500,26 +2500,26 @@ elif mode == "ETFs con Dividendos":
     col_etf_input, col_etf_btn = st.columns([3, 1])
     with col_etf_input:
         custom_etf = st.text_input(
-            "Anadir ETF a tu lista",
-            placeholder="ej: SCHD, VYM, JEPI",
+            "Add ETF to your list",
+            placeholder="e.g. SCHD, VYM, JEPI",
         ).strip().upper()
     with col_etf_btn:
         st.markdown("<br>", unsafe_allow_html=True)
-        if st.button("Anadir", use_container_width=True) and custom_etf:
+        if st.button("Add", use_container_width=True) and custom_etf:
             if custom_etf not in saved_etf_list:
                 saved_etf_list = saved_etf_list + [custom_etf]
                 prefs_mod.set_pref("etf_watchlist", saved_etf_list)
-                st.success(f"{custom_etf} anadido.")
+                st.success(f"{custom_etf} added.")
                 st.rerun()
             else:
-                st.info(f"{custom_etf} ya esta en la lista.")
+                st.info(f"{custom_etf} is already in the list.")
 
     # Manage list (remove)
-    with st.expander(f"Gestionar lista ({len(saved_etf_list)} ETFs)"):
+    with st.expander(f"Manage list ({len(saved_etf_list)} ETFs)"):
         rm_cols = st.columns(4)
         for i, sym in enumerate(saved_etf_list):
             with rm_cols[i % 4]:
-                if st.button(f"Quitar {sym}", key=f"etf_rm_{sym}"):
+                if st.button(f"Remove {sym}", key=f"etf_rm_{sym}"):
                     new_list = [s for s in saved_etf_list if s != sym]
                     prefs_mod.set_pref("etf_watchlist", new_list)
                     st.rerun()
@@ -2527,32 +2527,32 @@ elif mode == "ETFs con Dividendos":
     st.markdown("---")
 
     # --- Single ETF deep analysis ---
-    st.subheader("Analizar un ETF en detalle")
+    st.subheader("Analyze an ETF in detail")
     col_sel, col_analyze = st.columns([3, 1])
     with col_sel:
         etf_to_analyze = st.selectbox(
             "ETF",
             options=[""] + saved_etf_list,
-            format_func=lambda x: x if x else "Selecciona o escribe arriba...",
+            format_func=lambda x: x if x else "Select or type above...",
         )
     with col_analyze:
         st.markdown("<br>", unsafe_allow_html=True)
-        etf_analyze_btn = st.button("Analizar ETF", type="primary", use_container_width=True)
+        etf_analyze_btn = st.button("Analyze ETF", type="primary", use_container_width=True)
 
     if etf_to_analyze and etf_analyze_btn:
-        with st.spinner(f"Analizando {etf_to_analyze}..."):
+        with st.spinner(f"Analyzing {etf_to_analyze}..."):
             etf_result = etf_mod.run(etf_to_analyze)
 
         if etf_result is None:
-            st.error(f"No se pudo obtener datos para {etf_to_analyze}. Verifica que sea un ETF valido.")
+            st.error(f"Could not retrieve data for {etf_to_analyze}. Verify it is a valid ETF.")
         else:
             er = etf_result
 
             # Header
             st.markdown(f"### {er.name}")
             st.caption(
-                f"{er.symbol}  |  {er.category}  |  Emisor: {er.fund_family}  |  "
-                f"Frecuencia: {er.distribution_frequency}"
+                f"{er.symbol}  |  {er.category}  |  Issuer: {er.fund_family}  |  "
+                f"Frequency: {er.distribution_frequency}"
             )
 
             h1, h2, h3, h4 = st.columns(4)
@@ -2562,16 +2562,16 @@ elif mode == "ETFs con Dividendos":
             )
             h2.metric(
                 "Dividend Yield",
-                f"{er.dividend_yield*100:.2f}%" if er.dividend_yield else "N/D",
+                f"{er.dividend_yield*100:.2f}%" if er.dividend_yield else "N/A",
             )
             h3.metric(
                 "Expense Ratio",
-                f"{er.expense_ratio*100:.3f}%" if er.expense_ratio else "N/D",
+                f"{er.expense_ratio*100:.3f}%" if er.expense_ratio else "N/A",
             )
             h4.metric(
                 "AUM",
                 (f"${er.total_assets/1e9:.1f}B" if er.total_assets and er.total_assets >= 1e9
-                 else (f"${er.total_assets/1e6:.0f}M" if er.total_assets else "N/D")),
+                 else (f"${er.total_assets/1e6:.0f}M" if er.total_assets else "N/A")),
             )
 
             # Verdict banner
@@ -2582,7 +2582,7 @@ elif mode == "ETFs con Dividendos":
                 f"<span style='font-size:1.1rem; font-weight:700; color:{er.verdict_color}'>"
                 f"{er.verdict}</span>"
                 f"<span style='color:#64748b; font-size:0.9rem; margin-left:0.8rem'>"
-                f"{er.total_score}/100 puntos</span></div>",
+                f"{er.total_score}/100 points</span></div>",
                 unsafe_allow_html=True,
             )
 
@@ -2605,15 +2605,15 @@ elif mode == "ETFs con Dividendos":
                 for c in sec.criteria:
                     icon = "+" if c.passed else "-"
                     with st.expander(f"{icon} {c.name}  —  {c.points_earned}/{c.points_max} pts  |  {c.raw_label}"):
-                        st.markdown(f"**Criterio:** {c.threshold}")
-                        st.markdown(f"**Justificacion:** {c.explanation}")
+                        st.markdown(f"**Criterion:** {c.threshold}")
+                        st.markdown(f"**Justification:** {c.explanation}")
 
             t1, t2, t3, t4, t5 = st.tabs([
                 f"Yield  {er.yield_section.score}/30",
-                f"Costo  {er.cost_section.score}/25",
-                f"Escala  {er.scale_section.score}/20",
-                f"Consistencia  {er.consistency_section.score}/15",
-                f"Crecimiento  {er.growth_section.score}/10",
+                f"Cost  {er.cost_section.score}/25",
+                f"Scale  {er.scale_section.score}/20",
+                f"Consistency  {er.consistency_section.score}/15",
+                f"Growth  {er.growth_section.score}/10",
             ])
             with t1: render_etf_section(er.yield_section)
             with t2: render_etf_section(er.cost_section)
@@ -2624,7 +2624,7 @@ elif mode == "ETFs con Dividendos":
     st.markdown("---")
 
     # --- Batch ranking of ETF list ---
-    st.subheader("Ranking de tu lista de ETFs")
+    st.subheader("Ranking of your ETF list")
 
     etf_cache_path = __import__("os").path.join(
         __import__("os").path.dirname(__file__), "data", "etf_cache.json"
@@ -2646,13 +2646,13 @@ elif mode == "ETFs con Dividendos":
             try:
                 ts = datetime.fromisoformat(etf_cache["timestamp"])
                 st.info(
-                    f"Cache: {len(etf_cache.get('results', {}))} ETFs analizados. "
-                    f"Actualizado: {ts.strftime('%d/%m/%Y %H:%M')}"
+                    f"Cache: {len(etf_cache.get('results', {}))} ETFs analyzed. "
+                    f"Updated: {ts.strftime('%d/%m/%Y %H:%M')}"
                 )
             except Exception:
                 pass
     with col_ec2:
-        run_etf_batch = st.button("Analizar lista completa", use_container_width=True)
+        run_etf_batch = st.button("Analyze full list", use_container_width=True)
 
     if run_etf_batch:
         etf_pb = st.progress(0)
@@ -2660,13 +2660,13 @@ elif mode == "ETFs con Dividendos":
 
         def _etf_progress(cur, tot, sym):
             etf_pb.progress(cur / tot)
-            etf_status.text(f"[{cur}/{tot}] Analizando {sym}...")
+            etf_status.text(f"[{cur}/{tot}] Analyzing {sym}...")
 
-        with st.spinner(f"Analizando {len(saved_etf_list)} ETFs..."):
+        with st.spinner(f"Analyzing {len(saved_etf_list)} ETFs..."):
             batch_results = etf_mod.run_batch(saved_etf_list, progress_callback=_etf_progress)
 
         etf_pb.progress(1.0)
-        etf_status.text("Analisis completado.")
+        etf_status.text("Analysis complete.")
 
         # Save cache
         serialized = {}
@@ -2692,7 +2692,7 @@ elif mode == "ETFs con Dividendos":
         with open(etf_cache_path, "w") as f:
             _json.dump({"timestamp": datetime.now().isoformat(), "results": serialized}, f, indent=2)
         etf_cache = {"timestamp": datetime.now().isoformat(), "results": serialized}
-        st.success("Analisis de ETFs completado.")
+        st.success("ETF analysis complete.")
         st.rerun()
 
     # Show ranking from cache
@@ -2702,24 +2702,24 @@ elif mode == "ETFs con Dividendos":
         for sym, r in cached_etfs.items():
             if r is None:
                 rows.append({
-                    "Ticker": sym, "Nombre": "Error / sin datos", "Score": 0,
-                    "Yield": "N/D", "Expense Ratio": "N/D", "AUM": "N/D",
-                    "Frecuencia": "—", "Veredicto": "Error",
+                    "Ticker": sym, "Name": "Error / no data", "Score": 0,
+                    "Yield": "N/A", "Expense Ratio": "N/A", "AUM": "N/A",
+                    "Frequency": "—", "Verdict": "Error",
                 })
             else:
                 aum = r.get("total_assets")
                 rows.append({
                     "Ticker": sym,
-                    "Nombre": r.get("name", "")[:30],
+                    "Name": r.get("name", "")[:30],
                     "Score": r.get("total_score", 0),
                     "Yield": (f"{r['dividend_yield']*100:.2f}%"
-                              if r.get("dividend_yield") else "N/D"),
+                              if r.get("dividend_yield") else "N/A"),
                     "Expense Ratio": (f"{r['expense_ratio']*100:.3f}%"
-                                      if r.get("expense_ratio") else "N/D"),
+                                      if r.get("expense_ratio") else "N/A"),
                     "AUM": (f"${aum/1e9:.1f}B" if aum and aum >= 1e9
-                            else (f"${aum/1e6:.0f}M" if aum else "N/D")),
-                    "Frecuencia": r.get("distribution_frequency", "—"),
-                    "Veredicto": r.get("verdict", "—"),
+                            else (f"${aum/1e6:.0f}M" if aum else "N/A")),
+                    "Frequency": r.get("distribution_frequency", "—"),
+                    "Verdict": r.get("verdict", "—"),
                 })
 
         df_etf = pd.DataFrame(rows).sort_values("Score", ascending=False)
@@ -2733,12 +2733,12 @@ elif mode == "ETFs con Dividendos":
             marker_color=[score_color(s / 100) for s in df_etf["Score"]],
         ))
         fig_etf.add_hline(y=80, line_dash="dash", line_color="#10b981",
-                          annotation_text="Primera clase (80)", annotation_font_color="#10b981")
+                          annotation_text="Best in class (80)", annotation_font_color="#10b981")
         fig_etf.add_hline(y=65, line_dash="dash", line_color="#c9a84c",
-                          annotation_text="Buena opcion (65)", annotation_font_color="#c9a84c")
+                          annotation_text="Good option (65)", annotation_font_color="#c9a84c")
         _dark_layout(fig_etf, height=380)
         fig_etf.update_layout(
-            title=dict(text="Score de ETFs de Dividendos", font=dict(color="#e2e8f0")),
+            title=dict(text="Dividend ETF Score", font=dict(color="#e2e8f0")),
             yaxis=dict(range=[0, 108], title="Score", gridcolor="#1e2d45", linecolor="#2a3d5a"),
             margin=dict(t=50, b=40),
         )
@@ -2752,15 +2752,15 @@ elif mode == "ETFs con Dividendos":
 
         csv_etf = df_etf.to_csv(index=False).encode("utf-8")
         st.download_button(
-            "Descargar CSV",
+            "Download CSV",
             data=csv_etf,
             file_name=f"etf_ranking_{datetime.now().strftime('%Y%m%d')}.csv",
             mime="text/csv",
         )
     else:
-        st.info("Pulsa 'Analizar lista completa' para ver el ranking de todos tus ETFs.")
+        st.info("Click 'Analyze full list' to see the ranking of all your ETFs.")
 
     st.caption(
-        "Datos: Yahoo Finance. Score basado en yield, expense ratio, AUM, consistencia y retorno. "
-        "Analisis educativo — no es asesoramiento financiero."
+        "Data: Yahoo Finance. Score based on yield, expense ratio, AUM, consistency and return. "
+        "Educational analysis — not financial advice."
     )

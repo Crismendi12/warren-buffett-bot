@@ -88,13 +88,13 @@ class ETFAnalysis:
     @property
     def verdict(self) -> str:
         if self.total_score >= 80:
-            return "ETF de primera clase"
+            return "Best-in-class ETF"
         elif self.total_score >= 65:
-            return "Buena opcion"
+            return "Good option"
         elif self.total_score >= 50:
-            return "Aceptable con reservas"
+            return "Acceptable with reservations"
         else:
-            return "No recomendado para dividendos"
+            return "Not recommended for dividends"
 
     @property
     def verdict_color(self) -> str:
@@ -163,16 +163,16 @@ def _no_cuts(dividends: pd.Series, years: int = 3) -> bool:
 
 def _distribution_freq(dividends: pd.Series) -> str:
     if dividends is None or dividends.empty:
-        return "Desconocida"
+        return "Unknown"
     try:
         last_year = dividends[dividends.index.year == dividends.index.year.max()]
         count = len(last_year)
-        if count >= 11:  return "Mensual"
-        elif count >= 3: return "Trimestral"
-        elif count >= 1: return "Anual"
-        return "Desconocida"
+        if count >= 11:  return "Monthly"
+        elif count >= 3: return "Quarterly"
+        elif count >= 1: return "Annual"
+        return "Unknown"
     except Exception:
-        return "Desconocida"
+        return "Unknown"
 
 
 def _normalize_expense_ratio(er: Any) -> Optional[float]:
@@ -213,22 +213,22 @@ def _score_yield(info: dict, dividends: pd.Series) -> ETFSection:
     yld = _normalize_yield(info)
     if yld and yld >= 0.04:
         y_pts = 20
-        y_exp = f"Yield del {yld*100:.2f}% — excelente generacion de renta."
+        y_exp = f"Yield of {yld*100:.2f}% — excellent income generation."
     elif yld and yld >= 0.025:
         y_pts = 12
-        y_exp = f"Yield del {yld*100:.2f}% — buen rendimiento para dividendos."
+        y_exp = f"Yield of {yld*100:.2f}% — good dividend return."
     elif yld and yld >= 0.015:
         y_pts = 6
-        y_exp = f"Yield del {yld*100:.2f}% — rendimiento moderado."
+        y_exp = f"Yield of {yld*100:.2f}% — moderate return."
     else:
         y_pts = 0
-        y_exp = (f"Yield del {yld*100:.2f}% — muy bajo para ETF de dividendos." if yld
-                 else "Sin datos de yield disponibles.")
+        y_exp = (f"Yield of {yld*100:.2f}% — too low for a dividend ETF." if yld
+                 else "No yield data available.")
     criteria.append(ETFCriterion(
-        name="Dividend Yield actual",
+        name="Current Dividend Yield",
         points_earned=y_pts, points_max=20,
         raw_value=yld,
-        raw_label=f"{yld*100:.2f}%" if yld else "N/D",
+        raw_label=f"{yld*100:.2f}%" if yld else "N/A",
         threshold=">4% = 20pts | >2.5% = 12pts | >1.5% = 6pts",
         explanation=y_exp,
         passed=y_pts >= 12,
@@ -238,29 +238,29 @@ def _score_yield(info: dict, dividends: pd.Series) -> ETFSection:
     growth = _dividend_growth_cagr(dividends, years=3)
     if growth and growth >= 0.08:
         g_pts = 10
-        g_exp = f"Crecimiento del dividendo al {growth*100:.1f}% anual (3a CAGR) — ritmo excelente que protege contra la inflacion."
+        g_exp = f"Dividend growth of {growth*100:.1f}% annually (3yr CAGR) — excellent pace that protects against inflation."
     elif growth and growth >= 0.04:
         g_pts = 6
-        g_exp = f"Crecimiento del dividendo al {growth*100:.1f}% anual — buen ritmo de crecimiento."
+        g_exp = f"Dividend growth of {growth*100:.1f}% annually — good growth pace."
     elif growth and growth > 0:
         g_pts = 3
-        g_exp = f"Crecimiento del dividendo al {growth*100:.1f}% anual — positivo pero modesto."
+        g_exp = f"Dividend growth of {growth*100:.1f}% annually — positive but modest."
     else:
         g_pts = 0
-        g_exp = (f"Dividendo sin crecimiento o en contraccion ({growth*100:.1f}% CAGR)." if growth is not None
-                 else "Sin historial suficiente para calcular crecimiento del dividendo.")
+        g_exp = (f"Dividend with no growth or contracting ({growth*100:.1f}% CAGR)." if growth is not None
+                 else "Insufficient history to calculate dividend growth.")
     criteria.append(ETFCriterion(
-        name="Crecimiento del dividendo (3a CAGR)",
+        name="Dividend Growth (3yr CAGR)",
         points_earned=g_pts, points_max=10,
         raw_value=growth,
-        raw_label=f"{growth*100:.1f}% CAGR" if growth is not None else "N/D",
+        raw_label=f"{growth*100:.1f}% CAGR" if growth is not None else "N/A",
         threshold=">8% = 10pts | >4% = 6pts | >0% = 3pts",
         explanation=g_exp,
         passed=g_pts >= 6,
     ))
 
     total = sum(c.points_earned for c in criteria)
-    return ETFSection("Rendimiento (Yield)", total, 30, criteria)
+    return ETFSection("Yield (Return)", total, 30, criteria)
 
 
 def _score_cost(info: dict) -> ETFSection:
@@ -269,36 +269,36 @@ def _score_cost(info: dict) -> ETFSection:
 
     if er is not None and er < 0.0008:
         pts = 25
-        exp = f"Expense ratio del {er*100:.3f}% — ultra bajo, practicamente gratuito."
+        exp = f"Expense ratio of {er*100:.3f}% — ultra-low, practically free."
     elif er is not None and er <= 0.0015:
         pts = 20
-        exp = f"Expense ratio del {er*100:.3f}% — muy competitivo."
+        exp = f"Expense ratio of {er*100:.3f}% — very competitive."
     elif er is not None and er <= 0.003:
         pts = 14
-        exp = f"Expense ratio del {er*100:.2f}% — razonable para un ETF de dividendos."
+        exp = f"Expense ratio of {er*100:.2f}% — reasonable for a dividend ETF."
     elif er is not None and er <= 0.005:
         pts = 8
-        exp = f"Expense ratio del {er*100:.2f}% — aceptable pero existen alternativas mas baratas."
+        exp = f"Expense ratio of {er*100:.2f}% — acceptable but cheaper alternatives exist."
     elif er is not None and er <= 0.008:
         pts = 4
-        exp = f"Expense ratio del {er*100:.2f}% — caro. Resta retorno a largo plazo."
+        exp = f"Expense ratio of {er*100:.2f}% — expensive. Reduces long-term returns."
     elif er is not None:
         pts = 0
-        exp = f"Expense ratio del {er*100:.2f}% — muy alto para un ETF pasivo. Busca alternativas."
+        exp = f"Expense ratio of {er*100:.2f}% — very high for a passive ETF. Find alternatives."
     else:
         pts = 0
-        exp = "Sin datos de expense ratio. Verifica en el sitio del emisor antes de invertir."
+        exp = "No expense ratio data. Check the issuer's website before investing."
 
     criterion = ETFCriterion(
-        name="Ratio de Gastos (Expense Ratio)",
+        name="Expense Ratio",
         points_earned=pts, points_max=25,
         raw_value=er,
-        raw_label=f"{er*100:.3f}%" if er is not None else "N/D",
+        raw_label=f"{er*100:.3f}%" if er is not None else "N/A",
         threshold="<0.08% = 25pts | <0.15% = 20pts | <0.30% = 14pts | <0.50% = 8pts | <0.80% = 4pts",
         explanation=exp,
         passed=pts >= 14,
     )
-    return ETFSection("Costo (Expense Ratio)", pts, 25, [criterion])
+    return ETFSection("Cost (Expense Ratio)", pts, 25, [criterion])
 
 
 def _score_scale(info: dict) -> ETFSection:
@@ -308,34 +308,34 @@ def _score_scale(info: dict) -> ETFSection:
 
     if aum and aum >= 30e9:
         pts = 20
-        exp = f"AUM de ${aum/1e9:.1f}B — ETF masivo, maxima liquidez y sin riesgo de cierre."
+        exp = f"AUM of ${aum/1e9:.1f}B — massive ETF, maximum liquidity and no closure risk."
     elif aum and aum >= 10e9:
         pts = 16
-        exp = f"AUM de ${aum/1e9:.1f}B — gran escala, alta liquidez."
+        exp = f"AUM of ${aum/1e9:.1f}B — large scale, high liquidity."
     elif aum and aum >= 3e9:
         pts = 10
-        exp = f"AUM de ${aum/1e9:.1f}B — escala adecuada para operar sin problemas."
+        exp = f"AUM of ${aum/1e9:.1f}B — adequate scale for smooth operations."
     elif aum and aum >= 1e9:
         pts = 5
-        exp = f"AUM de ${aum/1e6:.0f}M — pequeno pero operativo."
+        exp = f"AUM of ${aum/1e6:.0f}M — small but operational."
     elif aum:
         pts = 0
-        exp = f"AUM de ${aum/1e6:.0f}M — muy pequeño. Riesgo de baja liquidez o cierre del ETF."
+        exp = f"AUM of ${aum/1e6:.0f}M — very small. Risk of low liquidity or ETF closure."
     else:
         pts = 0
-        exp = "Sin datos de AUM. Verifica antes de invertir."
+        exp = "No AUM data. Verify before investing."
 
     criterion = ETFCriterion(
-        name="Activos Bajo Gestion (AUM)",
+        name="Assets Under Management (AUM)",
         points_earned=pts, points_max=20,
         raw_value=aum,
         raw_label=(f"${aum/1e9:.1f}B" if aum and aum >= 1e9
-                   else (f"${aum/1e6:.0f}M" if aum else "N/D")),
+                   else (f"${aum/1e6:.0f}M" if aum else "N/A")),
         threshold=">$30B = 20pts | >$10B = 16pts | >$3B = 10pts | >$1B = 5pts",
         explanation=exp,
         passed=pts >= 10,
     )
-    return ETFSection("Escala y Liquidez (AUM)", pts, 20, [criterion])
+    return ETFSection("Scale and Liquidity (AUM)", pts, 20, [criterion])
 
 
 def _score_consistency(dividends: pd.Series) -> ETFSection:
@@ -345,21 +345,21 @@ def _score_consistency(dividends: pd.Series) -> ETFSection:
     yrs = _years_paying(dividends)
     if yrs >= 10:
         yp_pts = 10
-        yp_exp = f"Lleva {yrs} anos pagando dividendos — historial solido y probado en multiples ciclos economicos."
+        yp_exp = f"Has been paying dividends for {yrs} years — solid history proven through multiple economic cycles."
     elif yrs >= 5:
         yp_pts = 6
-        yp_exp = f"Lleva {yrs} anos pagando dividendos — historial razonable."
+        yp_exp = f"Has been paying dividends for {yrs} years — reasonable history."
     elif yrs >= 3:
         yp_pts = 3
-        yp_exp = f"Solo {yrs} anos de historial — insuficiente para confirmar consistencia."
+        yp_exp = f"Only {yrs} years of history — insufficient to confirm consistency."
     else:
         yp_pts = 0
-        yp_exp = f"Menos de 3 anos de historial de dividendos — muy corto."
+        yp_exp = f"Less than 3 years of dividend history — too short."
     criteria.append(ETFCriterion(
-        name="Anos pagando dividendos",
+        name="Years paying dividends",
         points_earned=yp_pts, points_max=10,
         raw_value=float(yrs),
-        raw_label=f"{yrs} anos",
+        raw_label=f"{yrs} years",
         threshold=">10a = 10pts | >5a = 6pts | >3a = 3pts",
         explanation=yp_exp,
         passed=yp_pts >= 6,
@@ -368,20 +368,20 @@ def _score_consistency(dividends: pd.Series) -> ETFSection:
     # 2. No cuts (5 pts)
     no_cut = _no_cuts(dividends, years=3)
     nc_pts = 5 if no_cut else 0
-    nc_exp = ("Sin recortes del dividendo en los ultimos 3 anos. Distribucion estable." if no_cut
-              else "Ha habido recortes significativos (>20%) en el dividendo en los ultimos 3 anos. Señal de alerta.")
+    nc_exp = ("No dividend cuts in the last 3 years. Stable distribution." if no_cut
+              else "Significant dividend cuts (>20%) in the last 3 years. Alert signal.")
     criteria.append(ETFCriterion(
-        name="Sin recortes en 3 anos",
+        name="No cuts in 3 years",
         points_earned=nc_pts, points_max=5,
         raw_value=1.0 if no_cut else 0.0,
-        raw_label="Sin recortes" if no_cut else "Con recortes",
-        threshold="Sin recortes = 5pts | Con recortes = 0pts",
+        raw_label="No cuts" if no_cut else "Cuts detected",
+        threshold="No cuts = 5pts | Cuts detected = 0pts",
         explanation=nc_exp,
         passed=no_cut,
     ))
 
     total = sum(c.points_earned for c in criteria)
-    return ETFSection("Consistencia del Dividendo", total, 15, criteria)
+    return ETFSection("Dividend Consistency", total, 15, criteria)
 
 
 def _score_growth(info: dict) -> ETFSection:
@@ -391,30 +391,30 @@ def _score_growth(info: dict) -> ETFSection:
 
     if r3y and r3y >= 0.08:
         pts = 10
-        exp = f"Retorno total anualizado 3a del {r3y*100:.1f}% — excelente apreciacion de capital ademas de los dividendos."
+        exp = f"3-year annualized total return of {r3y*100:.1f}% — excellent capital appreciation in addition to dividends."
     elif r3y and r3y >= 0.05:
         pts = 6
-        exp = f"Retorno total anualizado 3a del {r3y*100:.1f}% — bueno."
+        exp = f"3-year annualized total return of {r3y*100:.1f}% — good."
     elif r3y and r3y >= 0:
         pts = 3
-        exp = f"Retorno total anualizado 3a del {r3y*100:.1f}% — positivo pero modesto."
+        exp = f"3-year annualized total return of {r3y*100:.1f}% — positive but modest."
     elif r3y is not None:
         pts = 0
-        exp = f"Retorno total anualizado 3a del {r3y*100:.1f}% — negativo. Perdida de capital a pesar de los dividendos."
+        exp = f"3-year annualized total return of {r3y*100:.1f}% — negative. Capital loss despite dividends."
     else:
         pts = 0
-        exp = "Sin datos de retorno total a 3 anos."
+        exp = "No 3-year total return data."
 
     criterion = ETFCriterion(
-        name="Retorno Total Anualizado 3 anos",
+        name="3-Year Annualized Total Return",
         points_earned=pts, points_max=10,
         raw_value=r3y,
-        raw_label=f"{r3y*100:.1f}%" if r3y is not None else "N/D",
+        raw_label=f"{r3y*100:.1f}%" if r3y is not None else "N/A",
         threshold=">8% = 10pts | >5% = 6pts | >0% = 3pts",
         explanation=exp,
         passed=pts >= 6,
     )
-    return ETFSection("Crecimiento Total", pts, 10, [criterion])
+    return ETFSection("Total Growth", pts, 10, [criterion])
 
 
 # ---------------------------------------------------------------------------
